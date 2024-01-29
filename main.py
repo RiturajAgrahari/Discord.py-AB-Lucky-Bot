@@ -49,9 +49,9 @@ async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
     await check_time.start()
-    global guild_name
-    guild_name = client.guilds[0]  # guild name (Gameozone)
-
+    # global guild_name
+    # guild_name = client.guilds[0]  # guild name (Gameozone)
+    # print(guild_name)
 
 @tasks.loop(minutes=1)
 async def check_time():
@@ -72,6 +72,7 @@ async def on_message(message):
         username = str(message.author).split('#')[0]
         user_message = str(message.content)
         channel = str(message.channel.name)
+        guild_name = message.guild.name
         print(f"[{channel}-----{username}------] : {user_message}")
 
         if message.content == 'test' and message.author.mention == '<@568179896459722753>':
@@ -81,7 +82,11 @@ async def on_message(message):
             graph = await show_graph()
             await message.channel.send(file=graph)
 
-        elif message.content == 'add_record' and message.author.mention == '<@568179896459722753>':
+        elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
+            await reset_data()
+            await send_error(guild_name, __file__, on_message.__name__, 'Data reset seccessful!')
+
+        elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
             await add_record()
             await send_error(guild_name, __file__, on_message.__name__, 'Record is updated successfuly!')
 
@@ -178,7 +183,8 @@ async def daily_checkup():
         user = await client.fetch_user(568179896459722753)
         await user.send(file=record)
     except Exception as e:
-        await send_error(guild_name, __file__, on_ready.__name__, e)
+        pass
+        # await send_error(guild_name, __file__, on_ready.__name__, e)
 
 
 # Last Optimization [19-01-2024] --> Need Relocation

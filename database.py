@@ -4,9 +4,9 @@ import mysql.connector
 from datetime import date
 
 HOST = open('../Credentials/AB Update/mysql_host.txt', "r").read()
-USER = open('../Credentials/AB Update/mysql_host.txt', "r").read()
-PASSWORD = open('../Credentials/AB Update/mysql_host.txt', "r").read()
-DATABASE = open('../Credentials/AB Update/mysql_host.txt', "r").read()
+USER = open('../Credentials/AB Update/mysql_user.txt', "r").read()
+PASSWORD = open('../Credentials/AB Update/mysql_password.txt', "r").read()
+DATABASE = open('../Credentials/AB Update/mysql_database.txt', "r").read()
 
 def open_database():
     mydb = mysql.connector.connect(
@@ -166,8 +166,8 @@ async def reset_data():
     mydb = open_database()
     mycursor = mydb.cursor()
     sql = f"UPDATE today_luck SET status = %s, title = %s, description = %s, name1 = %s, value1 = %s, name2 = %s," \
-          f" value2 = %s, name3 = %s, value3 = %s, image = %s, event = %s, name4 = %s, value4 = %s"
-    val = [('Not Claimed', '', '', '', '', '', '', '', '', '', 'Not Claimed', '', '')]
+          f" value2 = %s, name3 = %s, value3 = %s, image = %s, name4 = %s, value4 = %s"
+    val = [('Not Claimed', '', '', '', '', '', '', '', '', '', '', '')]
     mycursor.executemany(sql, val)
     mydb.commit()
     mydb.close()
