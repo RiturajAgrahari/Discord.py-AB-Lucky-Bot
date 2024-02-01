@@ -1,7 +1,7 @@
 # Clear bottom test functions!
 import discord
 import mysql.connector
-from datetime import date
+from datetime import date, timedelta
 
 HOST = open('../Credentials/AB Update/mysql_host.txt', "r").read()
 USER = open('../Credentials/AB Update/mysql_user.txt', "r").read()
@@ -185,9 +185,13 @@ async def check_uses(yesterday_date):
 
 
 async def add_record():
-    today_date = str(date.today()).split('-')
-    yesterday_date = date(int(today_date[0]), int(today_date[1]), int(today_date[2]) - 1)
+    # today_date = str(date.today()).split('-')
+    # yesterday_date = date(int(today_date[0]), int(today_date[1]), int(today_date[2]) - 1)
+
+    today_date = date.today()
+    yesterday_date = today_date - timedelta(days=1)
     print(f'Function is running at {today_date} to add record of yesterday: {yesterday_date}')
+
     uses = await check_uses(str(yesterday_date))
     mydb = open_database()
     mycursor = mydb.cursor()
