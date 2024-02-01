@@ -77,7 +77,10 @@ async def on_message(message):
         print(f"[{channel}-----{username}------] : {user_message}")
 
         if message.content == 'test' and message.author.mention == '<@568179896459722753>':
-            await send_error(guild_name, __file__, on_message.__name__, 'error tested successful!')
+            await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
+
+        elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
+            print(ERROR_TADAA)
 
         elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
             graph = await show_graph()
@@ -85,15 +88,15 @@ async def on_message(message):
 
         elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
             await reset_data()
-            await send_error(guild_name, __file__, on_message.__name__, 'Data reset seccessful!')
+            await send_error(__file__, on_message.__name__, 'Data reset seccessful!', guild_name)
 
         elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
             await add_record()
-            await send_error(guild_name, __file__, on_message.__name__, 'Record is updated successfuly!')
+            await send_error(__file__, on_message.__name__, 'Record is updated successfuly!', guild_name)
 
         elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
             await update_dbms()
-            await send_error(guild_name, __file__, on_message.__name__, 'name4 and value4 and summary column added successfully!')
+            await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
 
         elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
             print('hi')
@@ -189,7 +192,7 @@ async def daily_checkup():
 
 
 # Last Optimization [19-01-2024] --> Need Relocation
-async def send_error(server, file, function_name, error):
+async def send_error(file, function_name, error, server='Anonymous'):
     embed = discord.Embed(title=f'{server} Server',
         description=file,
         color=discord.Color.red()
@@ -201,6 +204,13 @@ async def send_error(server, file, function_name, error):
     )
     user = await client.fetch_user(568179896459722753)
     await user.send(embed=embed)
+
+
+@client.event
+async def on_error(event, *args, **kwargs):
+    message = args[0] # Gets the message object
+    await send_error(__file__, event, 'Their is some error!')
+
 
 with open("Credentials/token.txt", "r") as credentials:
     TOKEN = credentials.read()
