@@ -1,3 +1,4 @@
 *.png
 .idea/
 _pycache_/
+test/
