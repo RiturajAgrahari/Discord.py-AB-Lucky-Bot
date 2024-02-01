@@ -1,5 +1,3 @@
 *.png
 .idea/
 _pycache_/
-test/
-ignore.py
