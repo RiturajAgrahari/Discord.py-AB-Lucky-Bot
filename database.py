@@ -1,16 +1,16 @@
 # Clear bottom test functions!
 import discord
+import os
 import mysql.connector
+from dotenv import load_dotenv
 from datetime import date, timedelta
 
-with open('Credentials/mysql_host.txt', "r") as host :
-    HOST = host.read()
-with open('Credentials/mysql_user.txt', "r") as user :
-    USER = user.read()
-with open('Credentials/mysql_password.txt', "r") as password :
-    PASSWORD = password.read()
-with open('Credentials/mysql_database.txt', "r") as database :
-    DATABASE = database.read()
+load_dotenv()
+
+HOST = os.getenv("MY_SQL_HOST")
+USER = os.getenv("MY_SQL_USER")
+PASSWORD = os.getenv("MY_SQL_PASSWORD")
+DATABASE = os.getenv("MY_SQL_DATABASE")
 
 def open_database():
     mydb = mysql.connector.connect(

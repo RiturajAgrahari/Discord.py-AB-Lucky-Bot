@@ -1,12 +1,13 @@
 import discord
+import os
+
 from discord import app_commands
 from discord.ext import tasks
-
 from datetime import datetime, timedelta
+from typing import Literal
+from dotenv import load_dotenv
 
 from embeds import help_embed
-
-from typing import Literal
 from luck import *
 from database import check_profile, lucky_claimed, check_status, get_data, reset_data, add_use, add_record,\
     update_dbms, check_event_status, start_trial
@@ -15,12 +16,12 @@ import datetime
 from review import review_area
 from Plotting import show_graph
 
-# MY_GUILD = discord.Object(id=850804938510172182)  # my server
-with open("Credentials/main_server.txt", "r") as main_server_id:
-    MAIN_GUILD_ID = int(main_server_id.read())
+load_dotenv()
 
-with open("Credentials/test_server.txt", "r") as test_server_id:
-    TEST_GUILD_ID = int(test_server_id.read())
+# MY_GUILD = discord.Object(id=850804938510172182)  # my server
+
+MAIN_GUILD_ID = int(os.getenv("MAIN_SERVER_ID"))
+TEST_GUILD_ID = int(os.getenv("TEST_SERVER_ID"))
 
 class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -212,6 +213,4 @@ async def on_error(event, *args, **kwargs):
     await send_error(__file__, event, 'Their is some error!')
 
 
-with open("Credentials/token.txt", "r") as credentials:
-    TOKEN = credentials.read()
-client.run(TOKEN)
+client.run(os.getenv("TOKEN"))
