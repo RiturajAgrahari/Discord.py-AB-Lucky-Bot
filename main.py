@@ -16,10 +16,11 @@ from review import review_area
 from Plotting import show_graph
 
 # MY_GUILD = discord.Object(id=850804938510172182)  # my server
+with open("Credentials/main_server.txt", "r") as main_server_id:
+    MAIN_GUILD_ID = int(main_server_id.read())
 
-TOKEN = open("../Credentials/AB Update/token.txt", "r").read()
-MAIN_GUILD_ID = int(open("../Credentials/AB Update/main_server.txt", "r").read())
-TEST_GUILD_ID = int(open("../Credentials/AB Update/test_server.txt", "r").read())
+with open("Credentials/test_server.txt", "r") as test_server_id:
+    TEST_GUILD_ID = int(test_server_id.read())
 
 class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -201,5 +202,6 @@ async def send_error(server, file, function_name, error):
     user = await client.fetch_user(568179896459722753)
     await user.send(embed=embed)
 
-
+with open("Credentials/token.txt", "r") as credentials:
+    TOKEN = credentials.read()
 client.run(TOKEN)

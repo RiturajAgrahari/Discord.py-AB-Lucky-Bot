@@ -3,10 +3,14 @@ import discord
 import mysql.connector
 from datetime import date, timedelta
 
-HOST = open('../Credentials/AB Update/mysql_host.txt', "r").read()
-USER = open('../Credentials/AB Update/mysql_user.txt', "r").read()
-PASSWORD = open('../Credentials/AB Update/mysql_password.txt', "r").read()
-DATABASE = open('../Credentials/AB Update/mysql_database.txt', "r").read()
+with open('Credentials/mysql_host.txt', "r") as host :
+    HOST = host.read()
+with open('Credentials/mysql_user.txt', "r") as user :
+    USER = user.read()
+with open('Credentials/mysql_password.txt', "r") as password :
+    PASSWORD = password.read()
+with open('Credentials/mysql_database.txt', "r") as database :
+    DATABASE = database.read()
 
 def open_database():
     mydb = mysql.connector.connect(
