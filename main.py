@@ -75,7 +75,7 @@ async def on_message(message):
         user_message = str(message.content)
         channel = str(message.channel.name)
         guild_name = message.guild.name
-        print(f"[{channel}-----{username}------] : {user_message}")
+        # print(f"[{channel}-----{username}------] : {user_message}")
 
         if message.content == 'test' and message.author.mention == '<@568179896459722753>':
             await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
