@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 from embeds import help_embed
 from luck import *
 from database import check_profile, lucky_claimed, check_status, get_data, reset_data, add_use, add_record,\
-    update_dbms, check_event_status, start_trial
+    update_dbms, check_event_status, start_trial, test_db
 import asyncio
 import datetime
 from review import review_area
@@ -82,6 +82,9 @@ async def on_message(message):
 
         elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
             print(ERROR_TADAA)
+
+        elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
+            await test_db()
 
         elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
             graph = await show_graph()

@@ -22,6 +22,19 @@ def open_database():
     return mydb
 
 
+async def test_db():
+    try:
+        mydb = open_database()
+        mycursor = mydb.cursor()
+        sql = 'show databases'
+        mycursor.execute(sql)
+        data = mycursor.fetchall()
+        print(data)
+    except Exception as e:
+        print(e)
+    finally:
+        mydb.close()
+
 # Need to add multiple columns and conditions!
 async def select_query(column:str, table:str, condition_column:str=None, condition_value:str | int=None,
                        order_by_column:str=None, ascending:bool=True, limit:int=None, offset:int=0):
