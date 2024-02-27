@@ -183,7 +183,7 @@ Weapons = {
     'Machine Gun': {'RPK16': none},
     'Shotguns': {'S12K': none, 'USAS12': none, 'MP133': none, 'M870': none},
     'Carbines': {'SKS': none, 'SA85M': none, 'MINI14': none, 'M96': none, 'M14': none, 'BM59': none},
-    'Pistols': {'G18C': none, 'G17': none, 'Desert Eagle': none, 'Gold Desert Eagle': none, 'M9A3': none, 'CZ52': none,
+    'Pistols': {'G18C': none, 'G17': none, 'Deagle': none, 'Gold Deagle': none, 'M9A3': none, 'CZ52': none,
                 'M1911': none, 'M45A1': none, 'T54': none, 'T05': none, 'MP9': none}
 }
 
@@ -227,21 +227,22 @@ Summaries = [
     'Venture into high-value zones with your trusty backpack—the secret doc. could be yours!'
 ]
 
+hvl = {}
+
 
 async def show_embed(data, name, avatar):
     embed = discord.Embed(
-        title=data[0], description=data[1], color=discord.Color.red()
+        title=data[0], description=data[10], color=discord.Color.red()
     )
-    embed.add_field(name=data[2], value=data[3], inline=True)
-    embed.add_field(name=data[4], value=data[5], inline=False)
-    embed.add_field(name=data[9], value=data[10], inline=True)
+    embed.add_field(name=data[2], value=data[3], inline=False)
+    embed.add_field(name=data[4], value=data[5], inline=True)
     embed.add_field(name=data[6], value=data[7], inline=True)
-    embed.set_author(name=name, icon_url=avatar)
     embed.set_footer(text=data[11])
     if data[8] != '':
         embed.set_image(url=f'{data[8]}')
     else:
         pass
+    embed.set_thumbnail(url=f'{hvl[data[10]]}')
     return embed
 
 
@@ -266,23 +267,18 @@ async def lucky_all_embeds(name, avatar):
     print(f'[{centered_name}] : {data}\n')
 
     embed = discord.Embed(
-        title="Your today's luck",
-        description='',
+        title="Today's Lucky Loot:",
+        description=random_loot,
         color=discord.Color.green()
     )
     embed.add_field(
         name=f'Lucky Location',
         value=f'{random_location} ({random_map} {random_mode})',
-        inline=True
+        inline=False
     )
     embed.add_field(
         name=f'Lucky container',
         value=f'{random_container}',
-        inline=False
-    )
-    embed.add_field(
-        name=f'High Value Item',
-        value=f'{random_loot}',
         inline=True
     )
     embed.add_field(
@@ -290,17 +286,25 @@ async def lucky_all_embeds(name, avatar):
         value=f'{random_weapon}',
         inline=True
     )
-    embed.set_author(name=name, icon_url=avatar)
+    # embed.set_author(name=name, icon_url=avatar)
     embed.set_footer(text=random_summary)
 
     search = fandom.search(str(random_weapon).capitalize(), results=1)
     page = fandom.page(title=search[0][0], pageid=search[0][1])
     image = page.images
+    if random_loot in hvl.keys():
+        image2 = hvl[random_loot]
+    else:
+        search2 = fandom.search(str(random_loot).capitalize(), results=1)
+        page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
+        image2 = page2.images
+        hvl[random_loot] = f'{image2[0]}'
     try:
         embed.set_image(url=f'{image[0]}')
+        embed.set_thumbnail(url=f'{image2[0]}')
     except:
         pass
 
-    return embed, "Your today's luck", '', 'Lucky Location', f'{random_location} ({random_map} {random_mode})',\
+    return embed, "Today's Lucky Loot:", '', 'Lucky Location', f'{random_location} ({random_map} {random_mode})',\
         f'Lucky container', f'{random_container}', 'Lucky gun', f'{random_weapon}', f'{image[0]}', f'High Value Item', f'{random_loot}', random_summary
 

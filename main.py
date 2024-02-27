@@ -70,6 +70,11 @@ async def on_message(message):
     if message.channel.type == discord.ChannelType.private:
         print(f'DM --> [{message.author}] : {message.content}')
 
+    # Check if the message author is not client itself
+    if message.author == client.user:
+        pass
+
+    # Message in server channels
     else:
         username = str(message.author).split('#')[0]
         user_message = str(message.content)
@@ -105,8 +110,6 @@ async def on_message(message):
         elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
             print('hi')
 
-    if message.author == client.user:
-        pass
 
 
 # Last Optimization [19-01-2024]
