@@ -300,11 +300,11 @@ async def lucky_all_embeds(name, avatar):
     else:
         search2 = fandom.search(str(random_loot).capitalize(), results=1)
         page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
-        image2 = page2.images
-        hvl[random_loot] = f'{image2[0]}'
+        image2 = page2.images[0]
+        hvl[random_loot] = f'{image2}'
     try:
         embed.set_image(url=f'{image[0]}')
-        embed.set_thumbnail(url=f'{image2[0]}')
+        embed.set_thumbnail(url=f'{image2}')
     except:
         pass
 
