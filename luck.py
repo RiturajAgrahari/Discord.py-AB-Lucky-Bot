@@ -243,7 +243,10 @@ async def show_embed(data, name, avatar):
     else:
         pass
     if data[8] != '':
-        embed.set_thumbnail(url=f'{hvl[data[10]]}')
+        try:
+            embed.set_thumbnail(url=f'{hvl[data[10]]}')
+        except:
+            pass
     else:
         pass
     return embed
