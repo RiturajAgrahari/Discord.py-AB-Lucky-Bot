@@ -218,13 +218,19 @@ High_Value_Loot = {
 }
 
 Summaries = [
-    'Load up on medical supplies; endure the battle, and claim victory to secure all resources.',
-    'Today, aim for that one-shot elimination in the dark zone!',
-    'Smart opportunities pave the way for a thriving future in the dark zone.',
-    'Take a break at the farm for some well-deserved relaxation.',
-    'Your patient wait in the dark zone guarantees rewarding outcomes.',
-    'Unleash formidable firepower in the Dark Zone to seize more loot!',
-    'Venture into high-value zones with your trusty backpack—the secret doc. could be yours!'
+    "In the Dark Zone, a stockpile of weapons and equipment will always come in handy.",
+    "Storing up valuable junk and waiting for the right time to use it is a good strategy.",
+    "Ammo is the most reliable resource in the Dark Zone."
+    "More equipment means more opportunities. You can't go wrong with this strategy.",
+    "Stored Koen can be used to buy important supplies.",
+    "Food and drink are always important resources in the Dark Zone.",
+    "Collecting rare keys is a big part of surviving in the Dark Zone.",
+    "Perhaps the secret is in the next raid!",
+    "Accumulating wealth is the key to survival in the DZ.",
+    "Bit by bit, your wealth is constantly expanding.",
+    "Overnight millionaires are no myth in the Dark Zone.",
+    "Defeating the strong is a mark of power in the Dark Zone.",
+    "Fortune really does favor the bold."
 ]
 
 hvl = {}
