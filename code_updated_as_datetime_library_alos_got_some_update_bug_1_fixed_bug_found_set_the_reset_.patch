@@ -1,0 +1,795 @@
+Subject: [PATCH] code updated as datetime library alos got some update
+bug 1 fixed
+bug found
+set the reset time to UTC 00:00
+added a missed line of code
+optimization, myql_table+, command used count++, exceess code--
+handling unknown interation error
+throws error when someone dm it, fixed
+reset data bug fixed
+an unnecessary line is removed
+enhanced performance, speed and optimized the code
+changed help embed
+---
+Index: embeds.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/embeds.py b/embeds.py
+--- a/embeds.py	(revision 2799ba592e8105d0426e7fb5312eccf824222788)
++++ b/embeds.py	(revision 61ef312bd378275a748ece8e781006f7b10581e0)
+@@ -1,5 +1,6 @@
+ import discord
+ 
++
+ async def help_embed(name, avatar):
+     embed = discord.Embed(
+         title='Features that we provide',
+@@ -7,8 +8,8 @@
+         color=discord.Color.dark_grey()
+     )
+     embed.add_field(
+-        name="1. /luck",
+-        value="This command will show yours today's lucky Container, Location and Weapon",
++        name="1. </luck:1171651940879454240>",
++        value="This command will show your lucky container, location and weapon for the day.",
+         inline=False
+     )
+     embed.add_field(
+@@ -17,10 +18,10 @@
+         inline=False
+     )
+     embed.add_field(
+-        name="2. /feedback",
+-        value="Give your ratings and review through this command, and we will definitely try to improve the bot!",
++        name="2. </feedback:1172116518738341908>",
++        value="Give your ratings and review through this command, and we will continue to improve the bot!",
+         inline=False
+     )
+     embed.set_author(name=name, icon_url=avatar)
+     embed.set_footer(text='Arena Breakout')
+-    return embed
+\ No newline at end of file
++    return embed
+Index: database.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/database.py b/database.py
+--- a/database.py	(revision acd691e03c105f47f0eed76bfae74d1d7986bd0a)
++++ b/database.py	(revision 61ef312bd378275a748ece8e781006f7b10581e0)
+@@ -1,5 +1,3 @@
+-# Clear bottom test functions!
+-import discord
+ import os
+ import mysql.connector
+ from dotenv import load_dotenv
+@@ -12,12 +10,14 @@
+ PASSWORD = os.getenv("MY_SQL_PASSWORD")
+ DATABASE = os.getenv("MY_SQL_DATABASE")
+ 
++
+ def open_database():
+     mydb = mysql.connector.connect(
+         host=HOST,
+         user=USER,
+         password=PASSWORD,
+-        database=DATABASE
++        database=DATABASE,
++        auth_plugin='mysql_native_password'
+     )
+     return mydb
+ 
+@@ -35,6 +35,7 @@
+     finally:
+         mydb.close()
+ 
++
+ # Need to add multiple columns and conditions!
+ async def select_query(column:str, table:str, condition_column:str=None, condition_value:str | int=None,
+                        order_by_column:str=None, ascending:bool=True, limit:int=None, offset:int=0):
+@@ -61,7 +62,6 @@
+ 
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    print(f'(sql select query): {sql}')
+     mycursor.execute(sql)
+     output = mycursor.fetchall()
+     mydb.close()
+@@ -91,72 +91,26 @@
+     mydb.commit()
+     mydb.close()
+     uid = await check_profile(interaction)
+-    # await adding_event_data('today_luck', uid)
+     return uid
+ 
+ 
+-async def lucky_claimed(event_name, uid, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary):
++async def lucky_claimed(uid, location, container, weapon, item, summary):
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = f"UPDATE {event_name} set status = %s, title = %s, description = %s, name1 = %s, value1 = %s, name2 = %s," \
+-          f" value2 = %s, name3 = %s, value3 = %s, image = %s, name4 = %s, value4 = %s, summary = %s WHERE uid = {uid}"
+-    val = [('Claimed', title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary)]
++    sql = f"INSERT INTO today_luck VALUES (DEFAULT, %s, %s, %s, %s, %s, %s)"
++    val = [(uid, location, container, weapon, item, summary)]
+     mycursor.executemany(sql, val)
+     mydb.commit()
+     mydb.close()
+ 
+ 
+-async def check_status(event_name, uid):
+-    mydb = open_database()
+-    mycursor = mydb.cursor()
+-    sql = f'SELECT status FROM {event_name} WHERE uid = {uid}'
+-    # sql = f'select check_claim_status({uid}) as claim_status;'
+-    mycursor.execute(sql)
+-    data = mycursor.fetchall()
+-    mydb.close()
+-    print(data)
+-    if len(data) == 0:
+-        await adding_event_data(event_name, uid)
+-        status = await check_status(event_name, uid)
+-        return status
+-    else:
+-        return data[0][0]
+-
+-
+-async def check_event_status(uid):
+-    mydb = open_database()
+-    mycursor = mydb.cursor()
+-    sql = f'SELECT event FROM today_luck WHERE uid = {uid}'
+-    mycursor.execute(sql)
+-    data = mycursor.fetchall()
+-    mydb.close()
+-    print(data)
+-    if len(data) == 0:
+-        await adding_event_data('today_luck', uid)
+-        status = await check_event_status(uid)
+-        return status
+-    else:
+-        return data[0][0]
+-
+-async def adding_event_data(event_name, uid):
+-    mydb = open_database()
+-    mycursor = mydb.cursor()
+-    sql = f'INSERT INTO {event_name} (uid) VALUES (%s)'
+-    val = [(uid)]
+-    mycursor.execute(sql, val)
+-    mydb.commit()
+-    mydb.close()
+-
+-
+-async def get_data(event_name, uid):
++async def get_data(uid):
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = f'SELECT title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary from {event_name}' \
+-          f' where uid = {uid}'
++    sql = f'SELECT location, container, weapon, item, summary from today_luck where uid = {uid}'
+     mycursor.execute(sql)
+     data = mycursor.fetchall()
+     mydb.close()
+-    print(data)
+     return data
+ 
+ 
+@@ -182,10 +136,8 @@
+ async def reset_data():
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = f"UPDATE today_luck SET status = %s, title = %s, description = %s, name1 = %s, value1 = %s, name2 = %s," \
+-          f" value2 = %s, name3 = %s, value3 = %s, image = %s, name4 = %s, value4 = %s"
+-    val = [('Not Claimed', '', '', '', '', '', '', '', '', '', '', '')]
+-    mycursor.executemany(sql, val)
++    sql = f"DELETE FROM today_luck"
++    mycursor.execute(sql)
+     mydb.commit()
+     mydb.close()
+     print('data reset successful!')
+@@ -202,9 +154,6 @@
+ 
+ 
+ async def add_record():
+-    # today_date = str(date.today()).split('-')
+-    # yesterday_date = date(int(today_date[0]), int(today_date[1]), int(today_date[2]) - 1)
+-
+     today_date = date.today()
+     yesterday_date = today_date - timedelta(days=1)
+     print(f'Function is running at {today_date} to add record of yesterday: {yesterday_date}')
+@@ -219,35 +168,30 @@
+     mydb.close()
+ 
+ 
+-async def update_dbms():
++async def set_bot_uses_date():
++    today_date = date.today()
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = 'ALTER TABLE today_luck ADD name4 VARCHAR(100)'
+-    mycursor.execute(sql)
+-    data = mycursor.fetchall()
++    sql = 'INSERT INTO bot_info (date) VALUES (%s)'
++    val = [(str(today_date))]
++    mycursor.execute(sql, val)
++    mydb.commit()
+     mydb.close()
+ 
++
++async def bot_uses(today_date):
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = 'ALTER TABLE today_luck ADD value4 VARCHAR(100)'
++    sql = f"UPDATE bot_info set lucky_bot = lucky_bot + 1 WHERE date = '{today_date}'"
+     mycursor.execute(sql)
+-    data = mycursor.fetchall()
++    mydb.commit()
+     mydb.close()
+ 
++
++async def update_dbms():
+     mydb = open_database()
+     mycursor = mydb.cursor()
+-    sql = 'ALTER TABLE today_luck ADD summary VARCHAR(300)'
++    sql = 'ALTER TABLE today_luck DROP COLUMN status'
+     mycursor.execute(sql)
+-    data = mycursor.fetchall()
+-    mydb.close()
+-
+-
+-async def start_trial(interaction, val1, val2, val3, img):
+-    mydb = open_database()
+-    mycursor = mydb.cursor()
+-    sql = f"CALL get_data('{interaction.user}', '{interaction.user.mention}', '{val1}', '{val2}', '{val3}', '{img}');"
+-    mycursor.execute(sql, multi=True)
+-    response = mycursor.fetchall()
+-    print(response)
++    mydb.commit()
+     mydb.close()
+-    return response
+\ No newline at end of file
+Index: luck.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/luck.py b/luck.py
+--- a/luck.py	(revision acd691e03c105f47f0eed76bfae74d1d7986bd0a)
++++ b/luck.py	(revision 61ef312bd378275a748ece8e781006f7b10581e0)
+@@ -1,6 +1,7 @@
+ import discord
+ import random
+ import fandom
++from database import lucky_claimed, add_use
+ 
+ fandom.set_wiki('arena-breakout')
+ 
+@@ -236,41 +237,52 @@
+ hvl = {}
+ 
+ 
+-async def show_embed(data, name, avatar):
++async def show_embed(data):
+     embed = discord.Embed(
+-        title=data[0], description=data[10], color=discord.Color.red()
++        title="Today's Lucky Loot:", description=data[3], color=discord.Color.blue()
+     )
+-    embed.add_field(name=data[2], value=data[3], inline=False)
+-    embed.add_field(name=data[4], value=data[5], inline=True)
+-    embed.add_field(name=data[6], value=data[7], inline=True)
+-    embed.set_footer(text=data[11])
+-    if data[8] != '':
+-        embed.set_image(url=f'{data[8]}')
+-    else:
+-        pass
+-    if data[8] != '':
+-        try:
+-            embed.set_thumbnail(url=f'{hvl[data[10]]}')
+-        except:
+-            pass
++    embed.add_field(name='Lucky Location', value=data[0], inline=False)
++    embed.add_field(name='Lucky Container', value=data[1], inline=True)
++    embed.add_field(name='Lucky Gun', value=data[2], inline=True)
++    embed.set_footer(text=data[4])
++
++    for values in Weapons.values():
++        if data[2] in values:
++            if values[data[2]]:
++                image = values[data[2]]
++            else:
++                search = fandom.search(str(data[2]).capitalize(), results=1)
++                page = fandom.page(title=search[0][0], pageid=search[0][1])
++                image = page.images[0]
++                values[data[2]] = image
++
++    embed.set_image(url=image)
++
++    if High_Value_Loot[data[3]]:
++        image2 = High_Value_Loot[data[3]]
+     else:
+-        pass
++        search2 = fandom.search(str(data[3]).capitalize(), results=1)
++        page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
++        image2 = page2.images[0]
++        High_Value_Loot[data[3]] = image2
++
++    embed.set_thumbnail(url=image2)
+     return embed
+ 
+ 
+-async def lucky_all_embeds(name, avatar):
+-    random_mode = list(NEW.items())[random.randint(0, len(NEW)-1)][0]
++async def lucky_all_embeds(name, interaction, uid):
++    random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
+     maps = NEW[random_mode]
+-    random_map = list(maps.items())[random.randint(0, len(maps)-1)][0]
++    random_map = list(maps.keys())[random.randint(0, len(maps)-1)]
+     area = maps[random_map]
+-    random_area = list(area.items())[random.randint(0, len(area)-1)][0]
++    random_area = list(area.keys())[random.randint(0, len(area)-1)]
+     location = area[random_area]
+-    random_location = list(location.items())[random.randint(0, len(location)-1)][0]
++    random_location = list(location.keys())[random.randint(0, len(location)-1)]
+     container = location[random_location]
+     random_container = container[random.randint(0, len(container)-1)]
+-    random_category = list(Weapons.items())[random.randint(0, len(Weapons)-1)][0]
++    random_category = list(Weapons.keys())[random.randint(0, len(Weapons)-1)]
+     weapons = Weapons[random_category]
+-    random_weapon = list(weapons.items())[random.randint(0, len(weapons)-1)][0]
++    random_weapon = list(weapons.keys())[random.randint(0, len(weapons)-1)]
+     random_loot = list(High_Value_Loot.keys())[random.randint(0, len(High_Value_Loot)-1)]
+     random_summary = Summaries[random.randint(0, len(Summaries)-1)]
+     centered_name = str(name).center(30, '-')
+@@ -281,7 +293,7 @@
+     embed = discord.Embed(
+         title="Today's Lucky Loot:",
+         description=random_loot,
+-        color=discord.Color.green()
++        color=discord.Color.yellow()
+     )
+     embed.add_field(
+         name=f'Lucky Location',
+@@ -298,25 +310,32 @@
+         value=f'{random_weapon}',
+         inline=True
+     )
+-    # embed.set_author(name=name, icon_url=avatar)
+     embed.set_footer(text=random_summary)
+ 
+-    search = fandom.search(str(random_weapon).capitalize(), results=1)
+-    page = fandom.page(title=search[0][0], pageid=search[0][1])
+-    image = page.images
+-    if random_loot in hvl.keys():
+-        image2 = hvl[random_loot]
++    if weapons[random_weapon]:
++        image = weapons[random_weapon]
++    else:
++        search = fandom.search(str(random_weapon).capitalize(), results=1)
++        page = fandom.page(title=search[0][0], pageid=search[0][1])
++        image = page.images[0]
++        weapons[random_weapon] = image
++
++    if High_Value_Loot[random_loot]:
++        image2 = High_Value_Loot[random_loot]
+     else:
+         search2 = fandom.search(str(random_loot).capitalize(), results=1)
+         page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
+         image2 = page2.images[0]
+-        hvl[random_loot] = f'{image2}'
++        High_Value_Loot[random_loot] = image2
++
+     try:
+-        embed.set_image(url=f'{image[0]}')
++        embed.set_image(url=f'{image}')
+         embed.set_thumbnail(url=f'{image2}')
+     except:
+         pass
+ 
+-    return embed, "Today's Lucky Loot:", '', 'Lucky Location', f'{random_location} ({random_map} {random_mode})',\
+-        f'Lucky container', f'{random_container}', 'Lucky gun', f'{random_weapon}', f'{image[0]}', f'High Value Item', f'{random_loot}', random_summary
++    await interaction.followup.send(embed=embed)
++    await lucky_claimed(uid, f'{random_location} ({random_map} {random_mode})', random_container,
++                        random_weapon, random_loot, random_summary)
++    await add_use(uid)
+ 
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	(revision acd691e03c105f47f0eed76bfae74d1d7986bd0a)
++++ b/main.py	(revision 2c750b5193ce1b6cfa234cce9599b967b5f0a3f8)
+@@ -1,20 +1,18 @@
+-import discord
+ import os
++import sys
++import discord
++import datetime
+ 
+-from discord import app_commands
+ from discord.ext import tasks
+-from datetime import datetime, timedelta
+-from typing import Literal
+ from dotenv import load_dotenv
++from discord import app_commands
+ 
++from luck import *
+ from embeds import help_embed
+-from luck import *
+-from database import check_profile, lucky_claimed, check_status, get_data, reset_data, add_use, add_record,\
+-    update_dbms, check_event_status, start_trial, test_db
+-import asyncio
+-import datetime
+ from review import review_area
+ from Plotting import show_graph
++from database import (check_profile, get_data, reset_data, add_record, update_dbms, test_db, select_query, bot_uses,
++                      set_bot_uses_date)
+ 
+ load_dotenv()
+ 
+@@ -23,6 +21,7 @@
+ MAIN_GUILD_ID = int(os.getenv("MAIN_SERVER_ID"))
+ TEST_GUILD_ID = int(os.getenv("TEST_SERVER_ID"))
+ 
++
+ class MyClient(discord.Client):
+     def __init__(self, *, intents: discord.Intents):
+         super().__init__(intents=intents)
+@@ -51,15 +50,15 @@
+     print(f'Logged in as {client.user} (ID: {client.user.id})')
+     print('------')
+     await check_time.start()
+-    # global guild_name
+-    # guild_name = client.guilds[0]  # guild name (Gameozone)
+-    # print(guild_name)
++
+ 
+ @tasks.loop(minutes=1)
+ async def check_time():
+     # Get the current UTC time
+-    current_time_utc = datetime.datetime.utcnow().time()
+-
++    try:
++        current_time_utc = datetime.datetime.utcnow().today()
++    except Exception:
++        current_time_utc = datetime.datetime.now(datetime.datetime.UTC)
+     # Check if it's UTC 00:00
+     if current_time_utc.hour == 0 and current_time_utc.minute == 0:
+         await daily_checkup()
+@@ -67,13 +66,13 @@
+ 
+ @client.event
+ async def on_message(message):
+-    if message.channel.type == discord.ChannelType.private:
+-        print(f'DM --> [{message.author}] : {message.content}')
+-
+     # Check if the message author is not client itself
+     if message.author == client.user:
+         pass
+ 
++    elif message.channel.type == discord.ChannelType.private:
++        print(f'DM --> [{message.author}] : {message.content}')
++
+     # Message in server channels
+     else:
+         username = str(message.author).split('#')[0]
+@@ -82,97 +81,116 @@
+         guild_name = message.guild.name
+         # print(f"[{channel}-----{username}------] : {user_message}")
+ 
+-        if message.content == 'test' and message.author.mention == '<@568179896459722753>':
+-            await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
++        if message.guild.id == MAIN_GUILD_ID:
++            if message.content == 'test' and message.author.mention == '<@568179896459722753>':
++                await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
+ 
+-        elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
+-            print(ERROR_TADAA)
++            elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
++                print('ERROR_TADAA')
+ 
+-        elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
+-            await test_db()
++            elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
++                await daily_checkup()
+ 
+-        elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
+-            graph = await show_graph()
+-            await message.channel.send(file=graph)
++            elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
++                graph = await show_graph()
++                await message.channel.send(file=graph)
+ 
+-        elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
+-            await reset_data()
+-            await send_error(__file__, on_message.__name__, 'Data reset seccessful!', guild_name)
++            elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
++                await reset_data()
++                await send_error(__file__, on_message.__name__, 'Data reset seccessful!', guild_name)
+ 
+-        elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
+-            await add_record()
+-            await send_error(__file__, on_message.__name__, 'Record is updated successfuly!', guild_name)
++            elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
++                await add_record()
++                await send_error(__file__, on_message.__name__, 'Record is updated successfuly!', guild_name)
+ 
+-        elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
+-            await update_dbms()
+-            await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
++            elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
++                await update_dbms()
++                await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
+ 
+-        elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
+-            print('hi')
++            elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
++                print('hi')
+ 
++        else:
++            pass
+ 
+ 
+ # Last Optimization [19-01-2024]
+ @client.tree.command(name='help', description='Shows help for the bot.')
+-async def help(interaction: discord.Interaction):
++async def help_command(interaction: discord.Interaction):
+     if interaction.guild.id == MAIN_GUILD_ID:
++        await bot_uses(datetime.date.today())
+         avatar = await get_avatar(interaction)
+         embed = await help_embed(interaction.user, avatar)
+         await interaction.response.send_message(embed=embed)
+     else:
+-        await interaction.response.send_message(embed=discord.Embed(title='',
+-                                                                    description="This command is not available in this server.",
+-                                                                    color=discord.Color.red()), ephemeral=True)
++        await interaction.response.send_message(
++            embed=discord.Embed(title='',
++                                description="This command is not available in this server.",
++                                color=discord.Color.red()),
++            ephemeral=True)
+ 
+ 
+ # Last Optimization [19-01-2024]
+ @client.tree.command(name="feedback", description="help us to improve")
+ async def feedback(interaction: discord.Interaction):
+     if interaction.guild.id == MAIN_GUILD_ID:
++        await bot_uses(datetime.date.today())
+         # channel = client.get_channel(1085405558003204169)
+         uid = await check_profile(interaction)
+         await review_area(interaction, uid)
+     else:
+-        await interaction.response.send_message(embed=discord.Embed(title='',
+-                                                                    description="This command is not available in this server.",
+-                                                                    color=discord.Color.red()), ephemeral=True)
++        await interaction.response.send_message(
++            embed=discord.Embed(title='',
++                                description="This command is not available in this server.",
++                                color=discord.Color.red()),
++            ephemeral=True)
+ 
+ 
+ # Not Optimized
+ @client.tree.command(name="luck", description="all lucky!")
+ async def lucky_all(interaction: discord.Interaction):
+-    '''OLD METHOD'''
++    """OPTIMIZED METHOD"""
+ 
+     if interaction.guild.id == MAIN_GUILD_ID:
++        await bot_uses(datetime.date.today())
+         uid = await check_profile(interaction)
+-        status = await check_status('today_luck', uid)
+-        avatar = await get_avatar(interaction)
+-        if status == 'Not Claimed':
++        status = await select_query("*", table="today_luck", condition_column="uid", condition_value=uid)
++
++        if not len(status):
++            try:
+                 await interaction.response.defer()
+-                embed, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary = \
+-                    await lucky_all_embeds(interaction.user, avatar)
+-                await interaction.followup.send(embed=embed)
+-                await lucky_claimed('today_luck', uid, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary)
+-                await add_use(uid)
++                await lucky_all_embeds(interaction.user, interaction, uid)
++            except discord.errors.NotFound as e:
++                print(e)
++
+         else:
+-            data = await get_data('today_luck', uid)
++            data = await get_data(uid)
+             await interaction.response.defer()
+-            embed = await show_embed(data[0], interaction.user, avatar)
++            embed = await show_embed(data[0])
+             await interaction.followup.send(embed=embed)
++
++        '''OLD METHOD'''
++        # status = await check_status('today_luck', uid)
++        # avatar = await get_avatar(interaction)
++        # if status == 'Not Claimed':
++        #     try:
++        #         await interaction.response.defer()
++        #         await lucky_all_embeds(interaction.user, avatar, interaction, uid)
++        #     except discord.errors.NotFound as e:
++        #         print(e)
++        #
++        # else:
++        #     data = await get_data(uid)
++        #     await interaction.response.defer()
++        #     embed = await show_embed(data[0], interaction.user, avatar)
++        #     await interaction.followup.send(embed=embed)
++
+     else:
+-        await interaction.response.send_message(embed=discord.Embed(title='',
+-                                                                    description="This command is not available in this server.",
+-                                                                    color=discord.Color.red()), ephemeral=True)
+-
+-    """NEW METHOD"""
+-
+-    # await interaction.response.defer()
+-    # avatar = await get_avatar(interaction)
+-    # embed, title, description, name1, value1, name2, value2, name3, value3, image = \
+-    #     await lucky_all_embeds(interaction.user, avatar)
+-    # response = await start_trial(interaction, value1, value2, value3, image)
+-    # embed1 = await create_embed(response[0], interaction.user, avatar)
+-    # await interaction.followup.send(embed=embed1)
++        await interaction.response.send_message(
++            embed=discord.Embed(title='',
++                                description="This command is not available in this server.",
++                                color=discord.Color.red()),
++            ephemeral=True)
+ 
+ 
+ # Last Optimization [19-01-2024]
+@@ -180,35 +198,25 @@
+     try:
+         avatar_url = interaction.user.avatar.url
+         return avatar_url
+-    except Exception as e:
++    except Exception:
+         default_avatar_url = 'https://cdn.discordapp.com/attachments/1171092440233541632/1176439824622833764/Untitled.png?ex=656edff7&is=655c6af7&hm=3e2cd8767c426187fbfc3171749ccf0158152f94a9b64f5acb3ae0a868a907c5&'
+         return default_avatar_url
+ 
+ 
+ # Created at [19-01-2024] --> Need to be Tested
+ async def daily_checkup():
+-    try:
+-        await reset_data()
+-        await add_record()
+-        record = await show_graph()
+-        user = await client.fetch_user(568179896459722753)
+-        await user.send(file=record)
+-    except Exception as e:
+-        pass
+-        # await send_error(guild_name, __file__, on_ready.__name__, e)
++    await reset_data()
++    await add_record()
++    await set_bot_uses_date()
++    record = await show_graph()
++    user = await client.fetch_user(568179896459722753)
++    await user.send(file=record)
+ 
+ 
+-# Last Optimization [19-01-2024] --> Need Relocation
++# Last Optimization [13-03-2024]
+ async def send_error(file, function_name, error, server='Anonymous'):
+-    embed = discord.Embed(title=f'{server} Server',
+-        description=file,
+-        color=discord.Color.red()
+-    )
+-    embed.add_field(
+-        name=function_name,
+-        value=error,
+-        inline=False
+-    )
++    embed = discord.Embed(title=f'{server} Server', description=file, color=discord.Color.red())
++    embed.add_field(name=function_name, value=error, inline=False)
+     user = await client.fetch_user(568179896459722753)
+     await user.send(embed=embed)
+ 
+@@ -217,7 +225,7 @@
+ async def on_error(event, *args, **kwargs):
+     error = str(sys.exc_info())
+     error = error.replace(',', '\n')
+-    await send_owner(__file__, event, error)
++    await send_error(__file__, event, error)
+ 
+ 
+ client.run(os.getenv("TOKEN"))
+Index: Plotting.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Plotting.py b/Plotting.py
+--- a/Plotting.py	(revision 14199ca538521fecdebb65a5d3cac178492fc715)
++++ b/Plotting.py	(revision 61ef312bd378275a748ece8e781006f7b10581e0)
+@@ -1,54 +1,16 @@
+-import matplotlib.pyplot as plt
+-import numpy as np
+ import discord
++import numpy as np
++import matplotlib.pyplot as plt
+ from database import select_query
+-from discord.ui import View
+-
+-# async def show_graph(client, user, interaction, offset:int=0):
+-#     button1 = button2 = False
+-#     sn = await select_query(column='sn', table='record')
+-#     length = len(sn)
+-#
+-#     if offset < 10:
+-#         button2 = True
+-#     if offset > length - 10:
+-#         button1 = True
+-#
+-#     graph = await plot_graph(offset)
+-#
+-#     class MyView(View):
+-#         def __init__(self):
+-#             super().__init__(timeout=10)
+-#             self.response = None
+-#             self.click_count = 0
+-#
+-#         @discord.ui.button(label='Previous 10 days', style=discord.ButtonStyle.blurple, disabled=button1)
+-#         async def past_record(self, interaction: discord.Interaction, button:discord.ui.Button):
+-#             await show_graph(client, None, interaction, offset=offset + 10)
+-#
+-#         @discord.ui.button(label='Following 10 days', style=discord.ButtonStyle.blurple, disabled=button2)
+-#         async def next_record(self, interaction: discord.Interaction, button:discord.ui.Button):
+-#             await show_graph(client, None, interaction, offset=offset - 10)
+-#
+-#         @discord.ui.button(label='D', style=discord.ButtonStyle.red, disabled=False)
+-#         async def next_record(self, interaction: discord.Interaction, button:discord.ui.Button):
+-#             await interaction.message.delete()
+-#
+-#     view = MyView()
+-#     if user:
+-#         # view.response = await user.send(file=graph, view=view)
+-#         view.response = await interaction.response.send_message(attachments=[graph], view=view, )
+-#     else:
+-#         view.response = await interaction.response.edit_message(attachments=[graph], view=view, )
+-#
+-#
+ 
+ 
+-async def show_graph(offset:int=0):
++async def show_graph(offset: int = 0):
+     labels = []  # x-axis label
+     uses = []  # graph data (bar length)
+ 
+-    record = await select_query(column='*', table='record', order_by_column='sn', ascending=False, limit=10, offset=int(offset))
++    record = await select_query(
++        column='*', table='record', order_by_column='sn', ascending=False, limit=10, offset=int(offset))
++
+     print(record)
+     for i in range(0, len(record)):
+         labels.append(str(record[i][1]))  # list of x-axis label
+@@ -67,7 +29,6 @@
+     '''
+     ax = fig.add_axes([0.1, 0.2, 0.8, 0.7])
+ 
+-
+     ax.set_xlabel('Date ')  # x-axis global label
+     ax.set_ylabel('Number of Uses ')  # y-axis global label
+ 
+Index: review.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/review.py b/review.py
+--- a/review.py	(revision 14199ca538521fecdebb65a5d3cac178492fc715)
++++ b/review.py	(revision 61ef312bd378275a748ece8e781006f7b10581e0)
+@@ -17,8 +17,6 @@
+         async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
+             await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
+ 
+-        # traceback.print_exception(type(error), error, error.__traceback__)
+-
+     await interaction.response.send_modal(MyModal())
+ 
+ 
