@@ -145,8 +145,11 @@ async def lucky_all(interaction: discord.Interaction):
         status = await check_status('today_luck', uid)
         avatar = await get_avatar(interaction)
         if status == 'Not Claimed':
+            try:
                 await interaction.response.defer()
                 await lucky_all_embeds(interaction.user, avatar, interaction, uid)
+            except discord.errors.NotFound as e:
+                print(e)
 
         else:
             data = await get_data(uid)
