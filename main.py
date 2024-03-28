@@ -203,7 +203,6 @@ async def get_avatar(interaction):
 
 # Created at [19-01-2024] --> Need to be Tested
 async def daily_checkup():
-    await update_dbms()
     await reset_data()
     await add_record()
     await set_bot_uses_date()
