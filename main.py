@@ -58,7 +58,7 @@ async def check_time():
     current_time_utc = datetime.datetime.now(datetime.UTC)
 
     # Check if it's UTC 00:00
-    if current_time_utc.hour == 10 and current_time_utc.minute == 18:
+    if current_time_utc.hour == 0 and current_time_utc.minute == 0:
         await daily_checkup()
 
 
