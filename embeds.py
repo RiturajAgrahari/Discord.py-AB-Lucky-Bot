@@ -7,8 +7,8 @@ async def help_embed(name, avatar):
         color=discord.Color.dark_grey()
     )
     embed.add_field(
-        name="1. /luck",
-        value="This command will show yours today's lucky Container, Location and Weapon",
+        name="1. </luck:1171651940879454240>",
+        value="This command will show your lucky container, location and weapon for the day.",
         inline=False
     )
     embed.add_field(
@@ -17,8 +17,8 @@ async def help_embed(name, avatar):
         inline=False
     )
     embed.add_field(
-        name="2. /feedback",
-        value="Give your ratings and review through this command, and we will definitely try to improve the bot!",
+        name="2. </feedback:1172116518738341908>",
+        value="Give your ratings and review through this command, and we will continue to improve the bot!",
         inline=False
     )
     embed.set_author(name=name, icon_url=avatar)
