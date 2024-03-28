@@ -135,16 +135,11 @@ async def feedback(interaction: discord.Interaction):
                                                                     description="This command is not available in this server.",
                                                                     color=discord.Color.red()), ephemeral=True)
 
-
-traffic_control = []
-
-
 # Not Optimized
 @client.tree.command(name="luck", description="all lucky!")
 async def lucky_all(interaction: discord.Interaction):
     """OLD METHOD"""
 
-    traffic_control.append()
     if interaction.guild.id == MAIN_GUILD_ID:
         uid = await check_profile(interaction)
         status = await check_status('today_luck', uid)
