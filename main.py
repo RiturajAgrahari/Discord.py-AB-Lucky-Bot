@@ -116,6 +116,7 @@ async def on_message(message):
 @client.tree.command(name='help', description='Shows help for the bot.')
 async def help_command(interaction: discord.Interaction):
     if interaction.guild.id == MAIN_GUILD_ID:
+        await bot_uses(datetime.date.today())
         avatar = await get_avatar(interaction)
         embed = await help_embed(interaction.user, avatar)
         await interaction.response.send_message(embed=embed)
@@ -131,6 +132,7 @@ async def help_command(interaction: discord.Interaction):
 @client.tree.command(name="feedback", description="help us to improve")
 async def feedback(interaction: discord.Interaction):
     if interaction.guild.id == MAIN_GUILD_ID:
+        await bot_uses(datetime.date.today())
         # channel = client.get_channel(1085405558003204169)
         uid = await check_profile(interaction)
         await review_area(interaction, uid)
