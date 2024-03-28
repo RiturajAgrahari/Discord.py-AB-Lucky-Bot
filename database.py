@@ -182,10 +182,9 @@ async def add_review(uid, review, star_rating):
 async def reset_data():
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = f"UPDATE today_luck SET status = %s, title = %s, description = %s, name1 = %s, value1 = %s, name2 = %s," \
-          f" value2 = %s, name3 = %s, value3 = %s, image = %s, name4 = %s, value4 = %s"
-    val = [('Not Claimed', '', '', '', '', '', '', '', '', '', '', '')]
-    mycursor.executemany(sql, val)
+    sql = f"UPDATE today_luck SET status = %s"
+    val = [('Not Claimed')]
+    mycursor.execute(sql, val)
     mydb.commit()
     mydb.close()
     print('data reset successful!')
