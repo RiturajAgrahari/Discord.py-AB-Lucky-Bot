@@ -65,12 +65,12 @@ async def check_time():
 
 @client.event
 async def on_message(message):
-    if message.channel.type == discord.ChannelType.private:
-        print(f'DM --> [{message.author}] : {message.content}')
-
     # Check if the message author is not client itself
     if message.author == client.user:
         pass
+
+    if message.channel.type == discord.ChannelType.private:
+        print(f'DM --> [{message.author}] : {message.content}')
 
     # Message in server channels
     else:
