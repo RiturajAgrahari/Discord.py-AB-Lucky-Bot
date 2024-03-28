@@ -1,6 +1,7 @@
 import discord
 import random
 import fandom
+from database import lucky_claimed, add_use
 
 fandom.set_wiki('arena-breakout')
 
@@ -238,39 +239,50 @@ hvl = {}
 
 async def show_embed(data, name, avatar):
     embed = discord.Embed(
-        title=data[0], description=data[10], color=discord.Color.red()
+        title="Today's Lucky Loot:", description=data[3], color=discord.Color.red()
     )
-    embed.add_field(name=data[2], value=data[3], inline=False)
-    embed.add_field(name=data[4], value=data[5], inline=True)
-    embed.add_field(name=data[6], value=data[7], inline=True)
-    embed.set_footer(text=data[11])
-    if data[8] != '':
-        embed.set_image(url=f'{data[8]}')
+    embed.add_field(name='Lucky Location', value=data[0], inline=False)
+    embed.add_field(name='Lucky Container', value=data[1], inline=True)
+    embed.add_field(name='Lucky Gun', value=data[2], inline=True)
+    embed.set_footer(text=data[4])
+
+    for values in Weapons.values():
+        if data[2] in values:
+            if values[data[2]]:
+                image = values[data[2]]
+            else:
+                search = fandom.search(str(data[2]).capitalize(), results=1)
+                page = fandom.page(title=search[0][0], pageid=search[0][1])
+                image = page.images[0]
+                values[data[2]] = image
+
+    embed.set_image(url=image)
+
+    if High_Value_Loot[data[3]]:
+        image2 = High_Value_Loot[data[3]]
     else:
-        pass
-    if data[8] != '':
-        try:
-            embed.set_thumbnail(url=f'{hvl[data[10]]}')
-        except:
-            pass
-    else:
-        pass
+        search2 = fandom.search(str(data[3]).capitalize(), results=1)
+        page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
+        image2 = page2.images[0]
+        High_Value_Loot[data[3]] = image2
+
+    embed.set_thumbnail(url=image2)
     return embed
 
 
-async def lucky_all_embeds(name, avatar):
-    random_mode = list(NEW.items())[random.randint(0, len(NEW)-1)][0]
+async def lucky_all_embeds(name, avatar, interaction, uid):
+    random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
     maps = NEW[random_mode]
-    random_map = list(maps.items())[random.randint(0, len(maps)-1)][0]
+    random_map = list(maps.keys())[random.randint(0, len(maps)-1)]
     area = maps[random_map]
-    random_area = list(area.items())[random.randint(0, len(area)-1)][0]
+    random_area = list(area.keys())[random.randint(0, len(area)-1)]
     location = area[random_area]
-    random_location = list(location.items())[random.randint(0, len(location)-1)][0]
+    random_location = list(location.keys())[random.randint(0, len(location)-1)]
     container = location[random_location]
     random_container = container[random.randint(0, len(container)-1)]
-    random_category = list(Weapons.items())[random.randint(0, len(Weapons)-1)][0]
+    random_category = list(Weapons.keys())[random.randint(0, len(Weapons)-1)]
     weapons = Weapons[random_category]
-    random_weapon = list(weapons.items())[random.randint(0, len(weapons)-1)][0]
+    random_weapon = list(weapons.keys())[random.randint(0, len(weapons)-1)]
     random_loot = list(High_Value_Loot.keys())[random.randint(0, len(High_Value_Loot)-1)]
     random_summary = Summaries[random.randint(0, len(Summaries)-1)]
     centered_name = str(name).center(30, '-')
@@ -301,22 +313,30 @@ async def lucky_all_embeds(name, avatar):
     # embed.set_author(name=name, icon_url=avatar)
     embed.set_footer(text=random_summary)
 
-    search = fandom.search(str(random_weapon).capitalize(), results=1)
-    page = fandom.page(title=search[0][0], pageid=search[0][1])
-    image = page.images
-    if random_loot in hvl.keys():
-        image2 = hvl[random_loot]
+    if weapons[random_weapon]:
+        image = weapons[random_weapon]
+    else:
+        search = fandom.search(str(random_weapon).capitalize(), results=1)
+        page = fandom.page(title=search[0][0], pageid=search[0][1])
+        image = page.images[0]
+        weapons[random_weapon] = image
+
+    if High_Value_Loot[random_loot]:
+        image2 = High_Value_Loot[random_loot]
     else:
         search2 = fandom.search(str(random_loot).capitalize(), results=1)
         page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
         image2 = page2.images[0]
-        hvl[random_loot] = f'{image2}'
+        High_Value_Loot[random_loot] = image2
+
     try:
-        embed.set_image(url=f'{image[0]}')
+        embed.set_image(url=f'{image}')
         embed.set_thumbnail(url=f'{image2}')
     except:
         pass
 
-    return embed, "Today's Lucky Loot:", '', 'Lucky Location', f'{random_location} ({random_map} {random_mode})',\
-        f'Lucky container', f'{random_container}', 'Lucky gun', f'{random_weapon}', f'{image[0]}', f'High Value Item', f'{random_loot}', random_summary
+    await interaction.followup.send(embed=embed)
+    await lucky_claimed(uid, f'{random_location} ({random_map} {random_mode})', random_container,
+                        random_weapon, random_loot, random_summary)
+    await add_use(uid)
 

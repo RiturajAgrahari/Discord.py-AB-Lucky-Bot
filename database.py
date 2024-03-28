@@ -12,12 +12,14 @@ USER = os.getenv("MY_SQL_USER")
 PASSWORD = os.getenv("MY_SQL_PASSWORD")
 DATABASE = os.getenv("MY_SQL_DATABASE")
 
+
 def open_database():
     mydb = mysql.connector.connect(
         host=HOST,
         user=USER,
         password=PASSWORD,
-        database=DATABASE
+        database=DATABASE,
+        auth_plugin='mysql_native_password'
     )
     return mydb
 
@@ -95,12 +97,11 @@ async def creating_main_profile(interaction):
     return uid
 
 
-async def lucky_claimed(event_name, uid, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary):
+async def lucky_claimed(uid, location, container, weapon, item, summary):
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = f"UPDATE {event_name} set status = %s, title = %s, description = %s, name1 = %s, value1 = %s, name2 = %s," \
-          f" value2 = %s, name3 = %s, value3 = %s, image = %s, name4 = %s, value4 = %s, summary = %s WHERE uid = {uid}"
-    val = [('Claimed', title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary)]
+    sql = f"UPDATE today_luck set status=%s, location=%s, container=%s, weapon=%s, item=%s, summary=%s WHERE uid={uid}"
+    val = [('Claimed', location, container, weapon, item, summary)]
     mycursor.executemany(sql, val)
     mydb.commit()
     mydb.close()
@@ -148,11 +149,10 @@ async def adding_event_data(event_name, uid):
     mydb.close()
 
 
-async def get_data(event_name, uid):
+async def get_data(uid):
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = f'SELECT title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary from {event_name}' \
-          f' where uid = {uid}'
+    sql = f'SELECT location, container, weapon, item, summary from today_luck where uid = {uid}'
     mycursor.execute(sql)
     data = mycursor.fetchall()
     mydb.close()
@@ -220,25 +220,41 @@ async def add_record():
 
 
 async def update_dbms():
+    colos = ['title', 'description', 'name1', 'name2', 'name3', 'name4', 'image']
+    for col in colos:
+        mydb = open_database()
+        mycursor = mydb.cursor()
+        sql = f'ALTER TABLE today_luck DROP COLUMN {col}'
+        mycursor.execute(sql)
+        mydb.commit()
+        mydb.close()
+
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = 'ALTER TABLE today_luck ADD name4 VARCHAR(100)'
+    sql = 'ALTER TABLE today_luck CHANGE COLUMN value1 location varchar(100);'
     mycursor.execute(sql)
-    data = mycursor.fetchall()
+    mydb.commit()
     mydb.close()
 
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = 'ALTER TABLE today_luck ADD value4 VARCHAR(100)'
+    sql = 'ALTER TABLE today_luck CHANGE COLUMN value2 container varchar(100);'
     mycursor.execute(sql)
-    data = mycursor.fetchall()
+    mydb.commit()
     mydb.close()
 
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = 'ALTER TABLE today_luck ADD summary VARCHAR(300)'
+    sql = 'ALTER TABLE today_luck CHANGE COLUMN value3 weapon varchar(100);'
     mycursor.execute(sql)
-    data = mycursor.fetchall()
+    mydb.commit()
+    mydb.close()
+
+    mydb = open_database()
+    mycursor = mydb.cursor()
+    sql = 'ALTER TABLE today_luck CHANGE COLUMN value4 item varchar(100);'
+    mycursor.execute(sql)
+    mydb.commit()
     mydb.close()
 
 

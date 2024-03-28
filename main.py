@@ -1,17 +1,16 @@
 import discord
 import os
+import sys
 
 from discord import app_commands
 from discord.ext import tasks
-from datetime import datetime, timedelta
-from typing import Literal
+from datetime import datetime
 from dotenv import load_dotenv
 
 from embeds import help_embed
 from luck import *
-from database import check_profile, lucky_claimed, check_status, get_data, reset_data, add_use, add_record,\
+from database import check_profile, check_status, get_data, reset_data, add_record,\
     update_dbms, check_event_status, start_trial, test_db
-import asyncio
 import datetime
 from review import review_area
 from Plotting import show_graph
@@ -22,6 +21,7 @@ load_dotenv()
 
 MAIN_GUILD_ID = int(os.getenv("MAIN_SERVER_ID"))
 TEST_GUILD_ID = int(os.getenv("TEST_SERVER_ID"))
+
 
 class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
@@ -51,9 +51,7 @@ async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
     await check_time.start()
-    # global guild_name
-    # guild_name = client.guilds[0]  # guild name (Gameozone)
-    # print(guild_name)
+
 
 @tasks.loop(minutes=1)
 async def check_time():
@@ -86,7 +84,7 @@ async def on_message(message):
             await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
 
         elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
-            print(ERROR_TADAA)
+            print('ERROR_TADAA')
 
         elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
             await test_db()
@@ -111,13 +109,13 @@ async def on_message(message):
             print('hi')
 
 
-
 # Last Optimization [19-01-2024]
 @client.tree.command(name='help', description='Shows help for the bot.')
-async def help(interaction: discord.Interaction):
+async def help_command(interaction: discord.Interaction):
     if interaction.guild.id == MAIN_GUILD_ID:
         avatar = await get_avatar(interaction)
         embed = await help_embed(interaction.user, avatar)
+        # noinspection PyUnresolvedReferences
         await interaction.response.send_message(embed=embed)
     else:
         await interaction.response.send_message(embed=discord.Embed(title='',
@@ -138,24 +136,25 @@ async def feedback(interaction: discord.Interaction):
                                                                     color=discord.Color.red()), ephemeral=True)
 
 
+traffic_control = []
+
+
 # Not Optimized
 @client.tree.command(name="luck", description="all lucky!")
 async def lucky_all(interaction: discord.Interaction):
-    '''OLD METHOD'''
+    """OLD METHOD"""
 
+    traffic_control.append()
     if interaction.guild.id == MAIN_GUILD_ID:
         uid = await check_profile(interaction)
         status = await check_status('today_luck', uid)
         avatar = await get_avatar(interaction)
         if status == 'Not Claimed':
                 await interaction.response.defer()
-                embed, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary = \
-                    await lucky_all_embeds(interaction.user, avatar)
-                await interaction.followup.send(embed=embed)
-                await lucky_claimed('today_luck', uid, title, description, name1, value1, name2, value2, name3, value3, image, name4, value4, summary)
-                await add_use(uid)
+                await lucky_all_embeds(interaction.user, avatar, interaction, uid)
+
         else:
-            data = await get_data('today_luck', uid)
+            data = await get_data(uid)
             await interaction.response.defer()
             embed = await show_embed(data[0], interaction.user, avatar)
             await interaction.followup.send(embed=embed)
@@ -198,7 +197,7 @@ async def daily_checkup():
         # await send_error(guild_name, __file__, on_ready.__name__, e)
 
 
-# Last Optimization [19-01-2024] --> Need Relocation
+# Last Optimization [13-03-2024]
 async def send_error(file, function_name, error, server='Anonymous'):
     embed = discord.Embed(title=f'{server} Server',
         description=file,
@@ -217,7 +216,7 @@ async def send_error(file, function_name, error, server='Anonymous'):
 async def on_error(event, *args, **kwargs):
     error = str(sys.exc_info())
     error = error.replace(',', '\n')
-    await send_owner(__file__, event, error)
+    await send_error(__file__, event, error)
 
 
 client.run(os.getenv("TOKEN"))
