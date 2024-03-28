@@ -87,7 +87,7 @@ async def on_message(message):
                 print('ERROR_TADAA')
 
             elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
-                await test_db()
+                await daily_checkup()
 
             elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
                 graph = await show_graph()
