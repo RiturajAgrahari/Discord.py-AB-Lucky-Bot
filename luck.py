@@ -237,9 +237,9 @@ Summaries = [
 hvl = {}
 
 
-async def show_embed(data, name, avatar):
+async def show_embed(data):
     embed = discord.Embed(
-        title="Today's Lucky Loot:", description=data[3], color=discord.Color.red()
+        title="Today's Lucky Loot:", description=data[3], color=discord.Color.blue()
     )
     embed.add_field(name='Lucky Location', value=data[0], inline=False)
     embed.add_field(name='Lucky Container', value=data[1], inline=True)
@@ -270,7 +270,7 @@ async def show_embed(data, name, avatar):
     return embed
 
 
-async def lucky_all_embeds(name, avatar, interaction, uid):
+async def lucky_all_embeds(name, interaction, uid):
     random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
     maps = NEW[random_mode]
     random_map = list(maps.keys())[random.randint(0, len(maps)-1)]
@@ -293,7 +293,7 @@ async def lucky_all_embeds(name, avatar, interaction, uid):
     embed = discord.Embed(
         title="Today's Lucky Loot:",
         description=random_loot,
-        color=discord.Color.green()
+        color=discord.Color.yellow()
     )
     embed.add_field(
         name=f'Lucky Location',
@@ -310,7 +310,6 @@ async def lucky_all_embeds(name, avatar, interaction, uid):
         value=f'{random_weapon}',
         inline=True
     )
-    # embed.set_author(name=name, icon_url=avatar)
     embed.set_footer(text=random_summary)
 
     if weapons[random_weapon]:

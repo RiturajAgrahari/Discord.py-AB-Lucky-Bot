@@ -1,54 +1,16 @@
-import matplotlib.pyplot as plt
-import numpy as np
 import discord
+import numpy as np
+import matplotlib.pyplot as plt
 from database import select_query
-from discord.ui import View
-
-# async def show_graph(client, user, interaction, offset:int=0):
-#     button1 = button2 = False
-#     sn = await select_query(column='sn', table='record')
-#     length = len(sn)
-#
-#     if offset < 10:
-#         button2 = True
-#     if offset > length - 10:
-#         button1 = True
-#
-#     graph = await plot_graph(offset)
-#
-#     class MyView(View):
-#         def __init__(self):
-#             super().__init__(timeout=10)
-#             self.response = None
-#             self.click_count = 0
-#
-#         @discord.ui.button(label='Previous 10 days', style=discord.ButtonStyle.blurple, disabled=button1)
-#         async def past_record(self, interaction: discord.Interaction, button:discord.ui.Button):
-#             await show_graph(client, None, interaction, offset=offset + 10)
-#
-#         @discord.ui.button(label='Following 10 days', style=discord.ButtonStyle.blurple, disabled=button2)
-#         async def next_record(self, interaction: discord.Interaction, button:discord.ui.Button):
-#             await show_graph(client, None, interaction, offset=offset - 10)
-#
-#         @discord.ui.button(label='D', style=discord.ButtonStyle.red, disabled=False)
-#         async def next_record(self, interaction: discord.Interaction, button:discord.ui.Button):
-#             await interaction.message.delete()
-#
-#     view = MyView()
-#     if user:
-#         # view.response = await user.send(file=graph, view=view)
-#         view.response = await interaction.response.send_message(attachments=[graph], view=view, )
-#     else:
-#         view.response = await interaction.response.edit_message(attachments=[graph], view=view, )
-#
-#
 
 
-async def show_graph(offset:int=0):
+async def show_graph(offset: int = 0):
     labels = []  # x-axis label
     uses = []  # graph data (bar length)
 
-    record = await select_query(column='*', table='record', order_by_column='sn', ascending=False, limit=10, offset=int(offset))
+    record = await select_query(
+        column='*', table='record', order_by_column='sn', ascending=False, limit=10, offset=int(offset))
+
     print(record)
     for i in range(0, len(record)):
         labels.append(str(record[i][1]))  # list of x-axis label
@@ -66,7 +28,6 @@ async def show_graph(offset:int=0):
     0.8 --> graph height
     '''
     ax = fig.add_axes([0.1, 0.2, 0.8, 0.7])
-
 
     ax.set_xlabel('Date ')  # x-axis global label
     ax.set_ylabel('Number of Uses ')  # y-axis global label

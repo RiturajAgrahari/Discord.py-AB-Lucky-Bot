@@ -1,5 +1,6 @@
 import discord
 
+
 async def help_embed(name, avatar):
     embed = discord.Embed(
         title='Features that we provide',

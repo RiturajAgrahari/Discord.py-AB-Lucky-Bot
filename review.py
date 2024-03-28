@@ -17,8 +17,6 @@ async def review_area(interaction, uid):
         async def on_error(self, interaction: discord.Interaction, error: Exception) -> None:
             await interaction.response.send_message('Oops! Something went wrong.', ephemeral=True)
 
-        # traceback.print_exception(type(error), error, error.__traceback__)
-
     await interaction.response.send_modal(MyModal())
 
 
