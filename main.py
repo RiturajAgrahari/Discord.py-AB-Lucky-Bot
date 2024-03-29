@@ -82,33 +82,39 @@ async def on_message(message):
         # print(f"[{channel}-----{username}------] : {user_message}")
 
         if message.guild.id == MAIN_GUILD_ID:
-            if message.content == 'test' and message.author.mention == '<@568179896459722753>':
-                await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
+            if message.channel.id == 1140635890608255016:
+                if message.content == "/luck" or "<@1149306688147562578>" in message.content:
+                    embed = await help_embed(username, message.author.avatar)
+                    await message.channel.send(embed=embed)
 
-            elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
-                print('ERROR_TADAA')
+            else:
+                if message.content == 'test' and message.author.mention == '<@568179896459722753>':
+                    await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
 
-            elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
-                await daily_checkup()
+                elif message.content == 'give_error' and message.author.mention == '<@568179896459722753>':
+                    print('ERROR_TADAA')
 
-            elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
-                graph = await show_graph()
-                await message.channel.send(file=graph)
+                elif message.content == 'check_mysql_status' and message.author.mention == '<@568179896459722753>':
+                    await daily_checkup()
 
-            elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
-                await reset_data()
-                await send_error(__file__, on_message.__name__, 'Data reset seccessful!', guild_name)
+                elif message.content == 'show_graph' and message.author.mention == '<@568179896459722753>':
+                    graph = await show_graph()
+                    await message.channel.send(file=graph)
 
-            elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
-                await add_record()
-                await send_error(__file__, on_message.__name__, 'Record is updated successfuly!', guild_name)
+                elif message.content == 'test_reset_data' and message.author.mention == '<@568179896459722753>':
+                    await reset_data()
+                    await send_error(__file__, on_message.__name__, 'Data reset seccessful!', guild_name)
 
-            elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
-                await update_dbms()
-                await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
+                elif message.content == 'test_add_record' and message.author.mention == '<@568179896459722753>':
+                    await add_record()
+                    await send_error(__file__, on_message.__name__, 'Record is updated successfuly!', guild_name)
 
-            elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
-                print('hi')
+                elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
+                    await update_dbms()
+                    await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
+
+                elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
+                    print('hi')
 
         else:
             pass
