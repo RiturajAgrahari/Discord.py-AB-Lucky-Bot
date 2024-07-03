@@ -129,7 +129,7 @@ async def feedback(interaction: discord.Interaction):
         await add_bot_use(datetime.date.today())
         # channel = client.get_channel(1085405558003204169)
         uid = await check_profile(interaction)
-        await review_area(interaction, uid)
+        await review_area(interaction, uid, client)
     else:
         await interaction.response.send_message(
             embed=discord.Embed(title='',

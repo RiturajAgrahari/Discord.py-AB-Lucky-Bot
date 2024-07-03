@@ -1,4 +1,4 @@
-from database import add_record, reset_data, set_bot_uses_date
+from database import add_record, reset_data, set_bot_uses_date, alter_db
 from Plotting import show_graph
 from discord.ui import View
 import discord
@@ -58,6 +58,15 @@ async def manage_bot(client):
             response = await reset_data()
             await message.delete()
             await interaction.response.send_message(response, ephemeral=True)
+
+        @discord.ui.button(label="Alter database", style=discord.ButtonStyle.red, custom_id="alter_db")
+        async def alter_dbms(self, interaction:discord.Interaction, button:discord.ui.Button):
+            await alter_db()
+            response = (f" > DB query run successfully: \n"
+                        f" > `ALTER TABLE bot_review ADD COLUMN review_on DATE DEFAULT (CURRENT_DATE);`\n"
+                        f" > **NOTE:** _Do not run this command again to avoid error in DB_")
+            await message.delete()
+            await interaction.response.send_message(response, ephemeral=False)
 
         async def on_timeout(self) -> None:
             try:
