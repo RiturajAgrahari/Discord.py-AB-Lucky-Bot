@@ -1,3 +1,5 @@
+"""LAST OPTIMIZATION [03-07-2024] """
+
 import os
 import mysql.connector
 from dotenv import load_dotenv
@@ -131,7 +133,10 @@ async def update_query(table:str, key_value:dict, condition_column:str=None, con
     set = ""
 
     for key, value in key_value.items():
-        if type(value) is str:
+        if value == "DEFAULT":
+            set += f", {key} = {value}"
+
+        elif type(value) is str:
             set += f", {key} = '{value}'"
 
         elif type(value) is int:
@@ -176,9 +181,6 @@ async def get_data(uid):
     return data
 
 
-"""NEED SOME WORK ON THESE?"""
-
-
 async def creating_main_profile(interaction):
     mydb = open_database()
     mycursor = mydb.cursor()
@@ -202,12 +204,7 @@ async def lucky_claimed(uid, location, container, weapon, item, summary):
 
 
 async def add_use(uid):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f'UPDATE profile set event_used = event_used + 1, last_used_on = DEFAULT where uid = {uid}'
-    mycursor.execute(sql)
-    mydb.commit()
-    mydb.close()
+    await update_query(table="profile", key_value={"event_used": 1, "last_used_on": "DEFAULT"}, condition_column="uid", condition_value=uid, operation="addition")
 
 
 async def add_review(uid, review, star_rating):
