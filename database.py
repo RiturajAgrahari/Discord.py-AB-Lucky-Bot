@@ -11,6 +11,10 @@ PASSWORD = os.getenv("MY_SQL_PASSWORD")
 DATABASE = os.getenv("MY_SQL_DATABASE")
 
 
+class FetchingDatabaseError(Exception):
+    pass
+
+
 def open_database():
     mydb = mysql.connector.connect(
         host=HOST,
@@ -22,18 +26,64 @@ def open_database():
     return mydb
 
 
-async def test_db():
-    try:
+async def count_rows(table: str, row: str):
+    mydb = open_database()
+    mycursor = mydb.cursor()
+    sql = f"SELECT COUNT({row}) FROM {table}"
+    mycursor.execute(sql)
+    output = mycursor.fetchall()[0][0]
+    mydb.close()
+    return output
+
+
+async def set_bot_uses_date():
+    today_date = date.today()
+
+    updated_date = await select_query("date", table="bot_info", condition_column="date", condition_value=str(today_date))
+    if updated_date:
+        return "date already updated!"
+    else:
         mydb = open_database()
         mycursor = mydb.cursor()
-        sql = 'show databases'
-        mycursor.execute(sql)
-        data = mycursor.fetchall()
-        print(data)
-    except Exception as e:
-        print(e)
-    finally:
+        sql = 'INSERT INTO bot_info (date) VALUES (%s)'
+        val = [(str(today_date))]
+        mycursor.execute(sql, val)
+        mydb.commit()
         mydb.close()
+        return "New Date row initiated successfully!"
+
+
+async def reset_data():
+    data = await select_query(column="*", table="today_luck")
+    if data:
+        mydb = open_database()
+        mycursor = mydb.cursor()
+        sql = f"DELETE FROM today_luck"
+        mycursor.execute(sql)
+        mydb.commit()
+        mydb.close()
+        return "Data Reset successfully"
+    else:
+        return "Data is already erased!"
+
+
+async def add_record():
+    today_date = date.today()
+    yesterday_date = today_date - timedelta(days=1)
+    last_record_date = await select_query(column="date", table="record", condition_column="date", condition_value=str(yesterday_date))
+    if last_record_date:
+        return "Record is already updated!"
+
+    else:
+        uses = await count_rows("today_luck", "uid")
+        mydb = open_database()
+        mycursor = mydb.cursor()
+        sql = 'INSERT INTO record (date, number_of_uses) VALUES (%s, %s)'
+        val = [(str(yesterday_date), uses)]
+        mycursor.executemany(sql, val)
+        mydb.commit()
+        mydb.close()
+        return "Record added successfully"
 
 
 # Need to add multiple columns and conditions!
@@ -68,18 +118,65 @@ async def select_query(column:str, table:str, condition_column:str=None, conditi
     return output
 
 
-async def check_profile(interaction):
+# Need to add multiple conditions!
+async def update_query(table:str, key_value:dict, condition_column:str=None, condition_value:str | int=None, operation:str='equal'):
+    if condition_column is None or condition_value is None:
+        condition = ""
+    else:
+        if type(condition_value) is str or type(condition_value) is None:
+            condition = f" WHERE {condition_column} = '{condition_value}'"
+        else:
+            condition = f" WHERE {condition_column} = {condition_value}"
+
+    set = ""
+
+    for key, value in key_value.items():
+        if type(value) is str:
+            set += f", {key} = '{value}'"
+
+        elif type(value) is int:
+            if operation == 'equal':
+                set += f", {key} = {value}"
+            elif operation == 'addition':
+                set += f", {key} = {key} + {value}"
+            elif operation == 'subtraction':
+                set += f", {key} = {key} - {value}"
+            else:
+                print('wrong operation!')
+        else:
+            print('wrong value datatype')
+
+    set = set.lstrip(',')
+
     mydb = open_database()
     mycursor = mydb.cursor()
-    sql = f'select uid from profile where discord_id = "{interaction.user.mention}"'
+    sql = f"UPDATE {table} SET{set}{condition}"
+    # print(f"(sql update query): {sql}")
     mycursor.execute(sql)
-    output = mycursor.fetchall()
+    mydb.commit()
     mydb.close()
+
+
+async def add_bot_use(today_date):
+    await update_query(table="bot_info", key_value={"lucky_bot": 1}, condition_column="date", condition_value=str(today_date), operation="addition")
+
+
+async def check_profile(interaction):
+    output = await select_query(column="uid", table="profile", condition_column="discord_id", condition_value=interaction.user.mention)
+
     if len(output) == 0:
         print(f'creating {interaction.user.name} profile...')
         return await creating_main_profile(interaction)
     else:
         return output[0][0]
+
+
+async def get_data(uid):
+    data = await select_query(column="location, container, weapon, item, summary", table="today_luck", condition_column="uid", condition_value=uid)
+    return data
+
+
+"""NEED SOME WORK ON THESE?"""
 
 
 async def creating_main_profile(interaction):
@@ -104,16 +201,6 @@ async def lucky_claimed(uid, location, container, weapon, item, summary):
     mydb.close()
 
 
-async def get_data(uid):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f'SELECT location, container, weapon, item, summary from today_luck where uid = {uid}'
-    mycursor.execute(sql)
-    data = mycursor.fetchall()
-    mydb.close()
-    return data
-
-
 async def add_use(uid):
     mydb = open_database()
     mycursor = mydb.cursor()
@@ -133,61 +220,6 @@ async def add_review(uid, review, star_rating):
     mydb.close()
 
 
-async def reset_data():
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f"DELETE FROM today_luck"
-    mycursor.execute(sql)
-    mydb.commit()
-    mydb.close()
-    print('data reset successful!')
-
-
-async def check_uses(yesterday_date):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f"SELECT count(*) FROM profile WHERE last_used_on ='{yesterday_date}'"
-    mycursor.execute(sql)
-    data = mycursor.fetchall()[0][0]
-    mydb.close()
-    return data
-
-
-async def add_record():
-    today_date = date.today()
-    yesterday_date = today_date - timedelta(days=1)
-    print(f'Function is running at {today_date} to add record of yesterday: {yesterday_date}')
-
-    uses = await check_uses(str(yesterday_date))
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = 'INSERT INTO record (date, number_of_uses) VALUES (%s, %s)'
-    val = [(str(yesterday_date), uses)]
-    mycursor.executemany(sql, val)
-    mydb.commit()
-    mydb.close()
-
-
-async def set_bot_uses_date():
-    today_date = date.today()
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = 'INSERT INTO bot_info (date) VALUES (%s)'
-    val = [(str(today_date))]
-    mycursor.execute(sql, val)
-    mydb.commit()
-    mydb.close()
-
-
-async def bot_uses(today_date):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f"UPDATE bot_info set lucky_bot = lucky_bot + 1 WHERE date = '{today_date}'"
-    mycursor.execute(sql)
-    mydb.commit()
-    mydb.close()
-
-
 async def update_dbms():
     mydb = open_database()
     mycursor = mydb.cursor()
@@ -195,3 +227,6 @@ async def update_dbms():
     mycursor.execute(sql)
     mydb.commit()
     mydb.close()
+
+
+
