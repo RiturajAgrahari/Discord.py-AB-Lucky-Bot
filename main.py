@@ -9,7 +9,7 @@ from discord import app_commands
 from luck import *
 from embeds import help_embed
 from review import review_area
-from database import (check_profile, get_data, update_dbms, select_query, add_bot_use)
+from database import (check_profile, get_data, select_query, add_bot_use)
 from manage import daily_checkup, manage_bot
 
 
@@ -98,10 +98,6 @@ async def on_message(message):
             else:
                 if message.content == 'test' and message.author.mention == '<@568179896459722753>':
                     await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
-
-                elif message.content == 'update_db' and message.author.mention == '<@568179896459722753>':
-                    await update_dbms()
-                    await send_error(__file__, on_message.__name__, 'name4 and value4 and summary column added successfully!', guild_name)
 
                 elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
                     print('hi')

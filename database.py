@@ -217,13 +217,5 @@ async def add_review(uid, review, star_rating):
     mydb.close()
 
 
-async def update_dbms():
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = 'ALTER TABLE today_luck DROP COLUMN status'
-    mycursor.execute(sql)
-    mydb.commit()
-    mydb.close()
-
 
 
