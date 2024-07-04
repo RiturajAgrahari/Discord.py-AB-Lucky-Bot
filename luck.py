@@ -180,17 +180,19 @@ NEW = {'': {
 
 Weapons = {
     'Assault Rifles': {'M4A1': none, 'H416': none, 'AKM': none, 'AK-74N': none, 'AK102': none, 'AKS74U': none,
-                       'FAL': none, 'F2000': none, 'AR57': none},
-    'Submachine Guns': {'MPX': none, 'MP5': none, 'MP40': none, 'MP45': none, 'UZI': none, 'P90': none, 'M3A1': none,
+                       'FAL': none, 'F2000': none, 'AR57': none, 'ACE31': none, 'AEK': none, 'AN94': none, 'AUG': none,
+                       'MDR': none},
+    'Submachine Guns': {'MPX': none, 'MP5': none, 'MP40': none, 'MPF45': none, 'UZI': none, 'P90': none, 'M3A1': none,
                         'MAC10': none, 'QC61': none, 'UMP45': none, 'Vector9': none, 'Vector45': none, 'T79': none,
                         'T85': none},
     'Marksman Rifles': {'VSS': none, 'SVDS': none, 'M110': none, 'MK14': none},
-    'Bolt-Action Rifles': {'Mosin': none, 'AX50': none, 'AR30': none, 'SJ16': none},
+    'Bolt-Action Rifles': {'Mosin': none, 'AX50': none, 'AR30': none, 'SJ16': none, 'M24': none},
     'Machine Gun': {'RPK16': none},
-    'Shotguns': {'S12K': none, 'USAS12': none, 'MP133': none, 'M870': none},
-    'Carbines': {'SKS': none, 'SA85M': none, 'MINI14': none, 'M96': none, 'M14': none, 'BM59': none},
-    'Pistols': {'G18C': none, 'G17': none, 'Deagle': none, 'Gold Deagle': none, 'M9A3': none, 'CZ52': none,
-                'M1911': none, 'M45A1': none, 'T54': none, 'T05': none, 'MP9': none}
+    'Shotguns': {'S12K': none, 'USAS12': none, 'MP133': none, 'M870': none, 'SPR310': none},
+    'Carbines': {'SA85M': none, 'MINI14': none, 'M96': none, 'BM59': none, 'M16': none, 'SVTU': none},
+    'Pistols': {'G17': none, 'M9A3': none, 'G18C': none, 'MP9': none, 'Deagle': none, 'Gold Deagle': none, 'T54': none,
+                'M1911': none, 'T05': none, 'M45A1': none, 'CZ52': none, 'F57': none}
+
 }
 
 High_Value_Loot = {
