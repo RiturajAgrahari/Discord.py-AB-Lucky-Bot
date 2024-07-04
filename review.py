@@ -72,4 +72,19 @@ async def send_review(client, review, rating, interaction):
     user = await client.fetch_user(568179896459722753)
     await user.send(embed=embed)
 
+    embed_response = discord.Embed(
+        title="Thankyou!",
+        description="Thank you for your review! We value your feedback and appreciate you taking the time to share it."
+                    " Your input helps us continuously improve and provide a better service for all users."
+                    "\nAdditionally, while this section is specifically for feedback on our review bot services,"
+                    " if you have feedback on any other aspect of our offerings, please don't hesitate to send it"
+                    " our way. We'll do our best to forward it to the appropriate team.",
+        color=discord.Color.gold()
+    )
+    embed_response.add_field(name="- Your Review:", value=review, inline=False)
+    embed_response.add_field(name="- Your Rating:", value=f"{rating} ⭐", inline=False)
+    embed_response.set_footer(text="Arena Breakout")
+    reviewer = await client.fetch_user(interaction.user.id)
+    await reviewer.send(embed=embed_response)
+
 

@@ -218,12 +218,13 @@ async def add_review(uid, review, star_rating):
 
 
 async def alter_db():
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = "ALTER TABLE bot_review ADD COLUMN review_on DATE DEFAULT (CURRENT_DATE);"
-    mycursor.execute(sql)
-    mydb.commit()
-    mydb.close()
+    pass
+    # mydb = open_database()
+    # mycursor = mydb.cursor()
+    # sql = "ALTER TABLE bot_review ADD COLUMN review_on DATE DEFAULT (CURRENT_DATE);"
+    # mycursor.execute(sql)
+    # mydb.commit()
+    # mydb.close()
 
 
 
