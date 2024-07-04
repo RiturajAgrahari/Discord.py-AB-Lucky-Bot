@@ -155,13 +155,17 @@ async def lucky_all(interaction: discord.Interaction):
                 await lucky_all_embeds(interaction.user, interaction, uid)
             except discord.errors.NotFound as e:
                 print(e)
+            except Exception as e:
+                print(e)
 
         else:
-            data = await get_data(uid)
-            await interaction.response.defer()
-            embed = await show_embed(data[0])
-            await interaction.followup.send(embed=embed)
-
+            try:
+                await interaction.response.defer()
+                data = await get_data(uid)
+                embed = await show_embed(data[0])
+                await interaction.followup.send(embed=embed)
+            except Exception as e:
+                print(e)
 
     else:
         await interaction.response.send_message(

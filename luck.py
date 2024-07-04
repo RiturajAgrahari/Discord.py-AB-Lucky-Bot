@@ -1,3 +1,8 @@
+"""
+DATA LAST UPDATED : [--------]
+LAST OPTIMIZATION : [04-07-2024]
+"""
+
 import discord
 import random
 import fandom
@@ -175,7 +180,7 @@ NEW = {'': {
 
 Weapons = {
     'Assault Rifles': {'M4A1': none, 'H416': none, 'AKM': none, 'AK-74N': none, 'AK102': none, 'AKS74U': none,
-                       'FAL': none, 'F2000': none, 'AR57': none, 'MOR': none},
+                       'FAL': none, 'F2000': none, 'AR57': none},
     'Submachine Guns': {'MPX': none, 'MP5': none, 'MP40': none, 'MP45': none, 'UZI': none, 'P90': none, 'M3A1': none,
                         'MAC10': none, 'QC61': none, 'UMP45': none, 'Vector9': none, 'Vector45': none, 'T79': none,
                         'T85': none},
@@ -270,7 +275,7 @@ async def show_embed(data):
     return embed
 
 
-async def lucky_all_embeds(name, interaction, uid):
+async def generate_random_data():
     random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
     maps = NEW[random_mode]
     random_map = list(maps.keys())[random.randint(0, len(maps)-1)]
@@ -280,62 +285,76 @@ async def lucky_all_embeds(name, interaction, uid):
     random_location = list(location.keys())[random.randint(0, len(location)-1)]
     container = location[random_location]
     random_container = container[random.randint(0, len(container)-1)]
-    random_category = list(Weapons.keys())[random.randint(0, len(Weapons)-1)]
-    weapons = Weapons[random_category]
-    random_weapon = list(weapons.keys())[random.randint(0, len(weapons)-1)]
-    random_loot = list(High_Value_Loot.keys())[random.randint(0, len(High_Value_Loot)-1)]
     random_summary = Summaries[random.randint(0, len(Summaries)-1)]
-    centered_name = str(name).center(30, '-')
-    data = {'location': random_location, 'container': random_container, 'weapon': random_weapon,
-            'category': random_category, 'loot': random_loot}
-    print(f'[{centered_name}] : {data}\n')
+    return f'{random_location} ({random_map} {random_mode})', random_container, random_summary
 
-    embed = discord.Embed(
-        title="Today's Lucky Loot:",
-        description=random_loot,
-        color=discord.Color.yellow()
-    )
-    embed.add_field(
-        name=f'Lucky Location',
-        value=f'{random_location} ({random_map} {random_mode})',
-        inline=False
-    )
-    embed.add_field(
-        name=f'Lucky container',
-        value=f'{random_container}',
-        inline=True
-    )
-    embed.add_field(
-        name='Lucky gun',
-        value=f'{random_weapon}',
-        inline=True
-    )
-    embed.set_footer(text=random_summary)
 
-    if weapons[random_weapon]:
-        image = weapons[random_weapon]
+async def get_random_weapon(n=0):
+    random_category = list(Weapons.keys())[random.randint(0, len(Weapons) - 1)]
+    weapons = Weapons[random_category]
+    random_weapon = list(weapons.keys())[random.randint(0, len(weapons) - 1)]
+
+    if Weapons[random_category][random_weapon]:
+        image = Weapons[random_category][random_weapon]
     else:
         search = fandom.search(str(random_weapon).capitalize(), results=1)
-        page = fandom.page(title=search[0][0], pageid=search[0][1])
-        image = page.images[0]
-        weapons[random_weapon] = image
+        if search:
+            page = fandom.page(title=search[0][0], pageid=search[0][1])
+            image = page.images[0]
+            Weapons[random_category][random_weapon] = image
+        elif n < 5:
+            image, random_weapon = await get_random_weapon(n=n+1)
+        else:
+            image = None
+
+    return image, random_weapon
+
+
+async def get_random_loot_item(n=0):
+    random_loot = list(High_Value_Loot.keys())[random.randint(0, len(High_Value_Loot)-1)]
 
     if High_Value_Loot[random_loot]:
-        image2 = High_Value_Loot[random_loot]
+        image = High_Value_Loot[random_loot]
     else:
-        search2 = fandom.search(str(random_loot).capitalize(), results=1)
-        page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
-        image2 = page2.images[0]
-        High_Value_Loot[random_loot] = image2
+        search = fandom.search(str(random_loot).capitalize(), results=1)
+        if search:
+            page = fandom.page(title=search[0][0], pageid=search[0][1])
+            image = page.images[0]
+            High_Value_Loot[random_loot] = image
+        elif n < 5:
+            image, random_loot = await get_random_weapon(n=n + 1)
+        else:
+            image = None
+
+    return image, random_loot
+
+
+async def lucky_all_embeds(name, interaction, uid):
+    random_location, random_container, random_summary = await generate_random_data()
+    weapon_image, random_weapon = await get_random_weapon()
+    loot_image, random_loot = await get_random_loot_item()
+
+    embed = discord.Embed(
+        title="Today's Lucky Loot:", description=random_loot, color=discord.Color.blue()
+    )
+    embed.add_field(name='Lucky Location', value=random_location, inline=False)
+    embed.add_field(name='Lucky Container', value=random_container, inline=True)
+    embed.add_field(name='Lucky Gun', value=random_weapon, inline=True)
+    embed.set_footer(text=random_summary)
 
     try:
-        embed.set_image(url=f'{image}')
-        embed.set_thumbnail(url=f'{image2}')
-    except:
-        pass
+        embed.set_image(url=f'{weapon_image}')
+        embed.set_thumbnail(url=f'{loot_image}')
+    except Exception as e:
+        print(e)
 
     await interaction.followup.send(embed=embed)
-    await lucky_claimed(uid, f'{random_location} ({random_map} {random_mode})', random_container,
+    await lucky_claimed(uid, random_location, random_container,
                         random_weapon, random_loot, random_summary)
+
+    centered_name = str(name).center(30, '-')
+    data = {'location': random_location, 'container': random_container, 'weapon': random_weapon, 'loot': random_loot}
+    print(f'[{centered_name}] : {data}\n')
+
     await add_use(uid)
 
