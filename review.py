@@ -4,7 +4,7 @@
 import discord
 from discord import ui
 from discord.ui import View, Button
-from database import add_review
+from models import Review
 
 
 async def review_area(interaction, uid, client):
@@ -32,31 +32,36 @@ async def rating_area(interaction1, review, uid, client):
         @discord.ui.button(label='1⭐', style=discord.ButtonStyle.red)
         async def one_star(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction1.edit_original_response(content='Thanks for the review!', embed=None, view=None)
-            await add_review(uid, review, 1)
+            review_obj = Review(uid=uid, review=review, star_rating=1)
+            await review_obj.save()
             await send_review(client, review, 1, interaction)
 
         @discord.ui.button(label='2⭐', style=discord.ButtonStyle.red)
         async def two_star(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction1.edit_original_response(content='Thanks for the review!', embed=None, view=None)
-            await add_review(uid, review, 2)
+            review_obj = Review(uid=uid, review=review, star_rating=1)
+            await review_obj.save()
             await send_review(client, review, 2, interaction)
 
         @discord.ui.button(label='3⭐', style=discord.ButtonStyle.blurple)
         async def three_star(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction1.edit_original_response(content='Thanks for the review!', embed=None, view=None)
-            await add_review(uid, review, 3)
+            review_obj = Review(uid=uid, review=review, star_rating=1)
+            await review_obj.save()
             await send_review(client, review, 3, interaction)
 
         @discord.ui.button(label='4⭐', style=discord.ButtonStyle.green)
         async def four_star(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction1.edit_original_response(content='Thanks for the review!', embed=None, view=None)
-            await add_review(uid, review, 4)
+            review_obj = Review(uid=uid, review=review, star_rating=1)
+            await review_obj.save()
             await send_review(client, review, 4, interaction)
 
         @discord.ui.button(label='5⭐', style=discord.ButtonStyle.green)
         async def five_star(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction1.edit_original_response(content='Thanks for the review!', embed=None, view=None)
-            await add_review(uid, review, 5)
+            review_obj = Review(uid=uid, review=review, star_rating=1)
+            await review_obj.save()
             await send_review(client, review, 5, interaction)
 
     view = MyView()

@@ -1,21 +1,21 @@
-[ 2024-11-11 17:04:40,929 matplotlib data path: /Users/meema/Work/DiscordBots/Discord.py-AB-Lucky-Bot/lucky-bot/lib/python3.9/site-packages/matplotlib/mpl-data ]
-[ 2024-11-11 17:04:40,937 CONFIGDIR=/Users/meema/.matplotlib ]
-[ 2024-11-11 17:04:40,938 interactive is False ]
-[ 2024-11-11 17:04:40,938 platform is darwin ]
-[ 2024-11-11 17:04:40,976 CACHEDIR=/Users/meema/.matplotlib ]
-[ 2024-11-11 17:04:40,978 Using fontManager instance from /Users/meema/.matplotlib/fontlist-v390.json ]
-[ 2024-11-11 17:04:41,157 PyNaCl is not installed, voice will NOT be supported ]
-[ 2024-11-11 17:04:41,157 on_ready has successfully been registered as an event ]
-[ 2024-11-11 17:04:41,157 on_message has successfully been registered as an event ]
-[ 2024-11-11 17:04:41,157 on_error has successfully been registered as an event ]
-[ 2024-11-11 17:04:41,158 Using selector: KqueueSelector ]
-[ 2024-11-11 17:04:41,158 logging in using static token ]
-[ 2024-11-11 17:04:44,900 GUILD ID : [1018816353030901801] Bot has Missing Access ]
-[ 2024-11-11 17:04:46,948 Shard ID None has connected to Gateway (Session ID: dbcb5b40e877cd4ac1328c81e980d067). ]
-[ 2024-11-11 17:04:49,320 Tortoise-ORM startup
+[ 2024-11-11 17:17:36,371 matplotlib data path: /Users/meema/Work/DiscordBots/Discord.py-AB-Lucky-Bot/lucky-bot/lib/python3.9/site-packages/matplotlib/mpl-data ]
+[ 2024-11-11 17:17:36,379 CONFIGDIR=/Users/meema/.matplotlib ]
+[ 2024-11-11 17:17:36,380 interactive is False ]
+[ 2024-11-11 17:17:36,380 platform is darwin ]
+[ 2024-11-11 17:17:36,420 CACHEDIR=/Users/meema/.matplotlib ]
+[ 2024-11-11 17:17:36,423 Using fontManager instance from /Users/meema/.matplotlib/fontlist-v390.json ]
+[ 2024-11-11 17:17:36,598 PyNaCl is not installed, voice will NOT be supported ]
+[ 2024-11-11 17:17:36,598 on_ready has successfully been registered as an event ]
+[ 2024-11-11 17:17:36,598 on_message has successfully been registered as an event ]
+[ 2024-11-11 17:17:36,598 on_error has successfully been registered as an event ]
+[ 2024-11-11 17:17:36,598 Using selector: KqueueSelector ]
+[ 2024-11-11 17:17:36,599 logging in using static token ]
+[ 2024-11-11 17:17:39,126 GUILD ID : [1018816353030901801] Bot has Missing Access ]
+[ 2024-11-11 17:17:41,290 Shard ID None has connected to Gateway (Session ID: 5ec63dd907787c58f2cf3b7bfaf454b5). ]
+[ 2024-11-11 17:17:43,668 Tortoise-ORM startup
     connections: {'default': {'engine': 'tortoise.backends.asyncpg', 'credentials': {'database': 'arena_breakout', 'host': '127.0.0.1', 'port': '5432', 'password': 'Ri***', 'user': 'postgres'}}}
     apps: {'models': {'models': ['models'], 'default_connection': 'default'}} ]
-[ 2024-11-11 17:04:49,345 Creating schema: CREATE TABLE IF NOT EXISTS "botusage" (
+[ 2024-11-11 17:17:43,701 Creating schema: CREATE TABLE IF NOT EXISTS "botusage" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "date" DATE NOT NULL  DEFAULT '2024-11-11',
     "fandom_bot" INT NOT NULL  DEFAULT 0,
@@ -44,8 +44,8 @@ CREATE TABLE IF NOT EXISTS "todayluck" (
     "summary" TEXT,
     "uid_id" BIGINT NOT NULL REFERENCES "profile" ("id") ON DELETE CASCADE
 ); ]
-[ 2024-11-11 17:04:49,374 Created connection pool <asyncpg.pool.Pool object at 0x108e5ff40> with params: {'host': '127.0.0.1', 'port': 5432, 'user': 'postgres', 'database': 'arena_breakout', 'min_size': 1, 'max_size': 5, 'connection_class': <class 'asyncpg.connection.Connection'>, 'loop': None, 'server_settings': {}} ]
-[ 2024-11-11 17:04:49,374 CREATE TABLE IF NOT EXISTS "botusage" (
+[ 2024-11-11 17:17:43,741 Created connection pool <asyncpg.pool.Pool object at 0x105a15f40> with params: {'host': '127.0.0.1', 'port': 5432, 'user': 'postgres', 'database': 'arena_breakout', 'min_size': 1, 'max_size': 5, 'connection_class': <class 'asyncpg.connection.Connection'>, 'loop': None, 'server_settings': {}} ]
+[ 2024-11-11 17:17:43,741 CREATE TABLE IF NOT EXISTS "botusage" (
     "id" BIGSERIAL NOT NULL PRIMARY KEY,
     "date" DATE NOT NULL  DEFAULT '2024-11-11',
     "fandom_bot" INT NOT NULL  DEFAULT 0,
@@ -74,5 +74,7 @@ CREATE TABLE IF NOT EXISTS "todayluck" (
     "summary" TEXT,
     "uid_id" BIGINT NOT NULL REFERENCES "profile" ("id") ON DELETE CASCADE
 ); ]
-[ 2024-11-11 17:05:17,977 SELECT "date","fandom_bot","rpg_bot","id","lucky_bot" FROM "botusage" WHERE "date"='2024-11-11T11:35:17.975348' LIMIT 2: None ]
-[ 2024-11-11 17:05:17,980 UPDATE "botusage" SET "date"=$1,"fandom_bot"=$2,"lucky_bot"=$3,"rpg_bot"=$4 WHERE "id"=$5: [datetime.date(2024, 11, 11), 1, 1, 0, 1] ]
+[ 2024-11-11 17:17:45,436 SELECT "fandom_bot","date","lucky_bot","id","rpg_bot" FROM "botusage" WHERE "date"='2024-11-11T11:47:45.435104' LIMIT 2: None ]
+[ 2024-11-11 17:17:45,441 UPDATE "botusage" SET "date"=$1,"fandom_bot"=$2,"lucky_bot"=$3,"rpg_bot"=$4 WHERE "id"=$5: [datetime.date(2024, 11, 11), 1, 4, 0, 1] ]
+[ 2024-11-11 17:17:45,447 SELECT "discord_name","discord_id","id","bot_used" FROM "profile" WHERE "discord_id"='<@568179896459722753>' LIMIT 2: None ]
+[ 2024-11-11 17:17:55,178 INSERT INTO "review" ("review","star_rating","reviewed_on","uid_id") VALUES ($1,$2,$3,$4) RETURNING "id": ['yo!', 1, datetime.datetime(2024, 11, 11, 11, 47, 55, 178740, tzinfo=<UTC>), 1] ]

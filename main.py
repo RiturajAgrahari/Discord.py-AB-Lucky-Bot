@@ -4,7 +4,7 @@ import datetime
 
 from log import logger
 from db import db_init
-from models import BotUsage
+from models import BotUsage, Profile
 
 from discord.ext import tasks
 from dotenv import load_dotenv
@@ -14,7 +14,7 @@ from discord.errors import Forbidden
 from luck import *
 from embeds import help_embed
 from review import review_area
-from database import (check_profile, get_data, select_query, add_bot_use)
+from database import get_data, select_query
 from manage import daily_checkup, manage_bot
 
 
@@ -128,23 +128,25 @@ async def help_command(interaction: discord.Interaction):
                                 color=discord.Color.red()),
             ephemeral=True)
 
-#
-# # Last Optimization [03-07-2024]
-# @client.tree.command(name="feedback", description="help us to improve")
-# async def feedback(interaction: discord.Interaction):
-#     if interaction.guild.id == MAIN_GUILD_ID:
-#         await add_bot_use(datetime.date.today())
-#         # channel = client.get_channel(1085405558003204169)
-#         uid = await check_profile(interaction)
-#         await review_area(interaction, uid, client)
-#     else:
-#         await interaction.response.send_message(
-#             embed=discord.Embed(title='',
-#                                 description="This command is not available in this server.",
-#                                 color=discord.Color.red()),
-#             ephemeral=True)
-#
-#
+
+# Last Optimization [03-07-2024]
+@client.tree.command(name="feedback", description="help us to improve")
+async def feedback(interaction: discord.Interaction):
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+        await add_bot_usage()
+        user = await Profile.get_or_none(discord_id=str(interaction.user.mention))
+        if not user:
+            user = Profile(discord_name=str(interaction.user.name), discord_id=str(interaction.user.mention))
+            await user.save()
+        await review_area(interaction, user, client)
+    else:
+        await interaction.response.send_message(
+            embed=discord.Embed(title='',
+                                description="This command is not available in this server.",
+                                color=discord.Color.red()),
+            ephemeral=True)
+
+
 # # Last Optimized [03-07-2024]
 # @client.tree.command(name="luck", description="all lucky!")
 # async def lucky_all(interaction: discord.Interaction):

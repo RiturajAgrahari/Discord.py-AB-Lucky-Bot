@@ -163,20 +163,6 @@ async def update_query(table:str, key_value:dict, condition_column:str=None, con
     mydb.close()
 
 
-async def add_bot_use(today_date):
-    await update_query(table="bot_info", key_value={"lucky_bot": 1}, condition_column="date", condition_value=str(today_date), operation="addition")
-
-
-async def check_profile(interaction):
-    output = await select_query(column="uid", table="profile", condition_column="discord_id", condition_value=interaction.user.mention)
-
-    if len(output) == 0:
-        print(f'creating {interaction.user.name} profile...')
-        return await creating_main_profile(interaction)
-    else:
-        return output[0][0]
-
-
 async def get_data(uid):
     data = await select_query(column="location, container, weapon, item, summary", table="today_luck", condition_column="uid", condition_value=uid)
     return data
@@ -190,7 +176,6 @@ async def creating_main_profile(interaction):
     mycursor.executemany(sql, val)
     mydb.commit()
     mydb.close()
-    uid = await check_profile(interaction)
     return uid
 
 
@@ -206,16 +191,6 @@ async def lucky_claimed(uid, location, container, weapon, item, summary):
 
 async def add_use(uid):
     await update_query(table="profile", key_value={"event_used": 1, "last_used_on": "DEFAULT"}, condition_column="uid", condition_value=uid, operation="addition")
-
-
-async def add_review(uid, review, star_rating):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f'INSERT into bot_review (uid, review, star_rating) VALUES (%s, %s, %s)'
-    val = [(uid, review, star_rating)]
-    mycursor.executemany(sql, val)
-    mydb.commit()
-    mydb.close()
 
 
 async def alter_db():
