@@ -6,7 +6,8 @@ LAST OPTIMIZATION : [04-07-2024]
 import discord
 import random
 import fandom
-from database import lucky_claimed, add_use
+
+from models import TodayLuck, Profile
 
 fandom.set_wiki('arena-breakout')
 
@@ -243,40 +244,6 @@ Summaries = [
 
 hvl = {}
 
-
-async def show_embed(data):
-    embed = discord.Embed(
-        title="Today's Lucky Loot:", description=data[3], color=discord.Color.blue()
-    )
-    embed.add_field(name='Lucky Location', value=data[0], inline=False)
-    embed.add_field(name='Lucky Container', value=data[1], inline=True)
-    embed.add_field(name='Lucky Gun', value=data[2], inline=True)
-    embed.set_footer(text=data[4])
-
-    for values in Weapons.values():
-        if data[2] in values:
-            if values[data[2]]:
-                image = values[data[2]]
-            else:
-                search = fandom.search(str(data[2]).capitalize(), results=1)
-                page = fandom.page(title=search[0][0], pageid=search[0][1])
-                image = page.images[0]
-                values[data[2]] = image
-
-    embed.set_image(url=image)
-
-    if High_Value_Loot[data[3]]:
-        image2 = High_Value_Loot[data[3]]
-    else:
-        search2 = fandom.search(str(data[3]).capitalize(), results=1)
-        page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
-        image2 = page2.images[0]
-        High_Value_Loot[data[3]] = image2
-
-    embed.set_thumbnail(url=image2)
-    return embed
-
-
 async def generate_random_data():
     random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
     maps = NEW[random_mode]
@@ -331,7 +298,7 @@ async def get_random_loot_item(n=0):
     return image, random_loot
 
 
-async def lucky_all_embeds(name, interaction, uid):
+async def lucky_all_embeds(interaction, uid):
     random_location, random_container, random_summary = await generate_random_data()
     weapon_image, random_weapon = await get_random_weapon()
     loot_image, random_loot = await get_random_loot_item()
@@ -351,12 +318,11 @@ async def lucky_all_embeds(name, interaction, uid):
         print(e)
 
     await interaction.followup.send(embed=embed)
-    await lucky_claimed(uid, random_location, random_container,
-                        random_weapon, random_loot, random_summary)
 
-    centered_name = str(name).center(30, '-')
-    data = {'location': random_location, 'container': random_container, 'weapon': random_weapon, 'loot': random_loot}
-    print(f'[{centered_name}] : {data}\n')
+    user_luck = TodayLuck(uid=uid, location=random_location, container=random_container, weapon=random_weapon,
+                          item=random_loot, summary=random_summary)
+    await user_luck.save()
 
-    await add_use(uid)
-
+    bot_usage = await Profile.get_or_none(id=uid.id)
+    bot_usage.bot_used = bot_usage.bot_used + 1
+    await bot_usage.save()

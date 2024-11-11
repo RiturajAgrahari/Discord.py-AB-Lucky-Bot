@@ -2,9 +2,11 @@ import os
 import sys
 import datetime
 
+import discord
+
 from log import logger
 from db import db_init
-from models import BotUsage, Profile
+from models import BotUsage, Profile, TodayLuck
 
 from discord.ext import tasks
 from dotenv import load_dotenv
@@ -12,7 +14,7 @@ from discord import app_commands
 from discord.errors import Forbidden
 
 from luck import *
-from embeds import help_embed
+from embeds import help_embed, today_luck_embed
 from review import review_area
 from database import get_data, select_query
 from manage import daily_checkup, manage_bot
@@ -134,10 +136,7 @@ async def help_command(interaction: discord.Interaction):
 async def feedback(interaction: discord.Interaction):
     if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
         await add_bot_usage()
-        user = await Profile.get_or_none(discord_id=str(interaction.user.mention))
-        if not user:
-            user = Profile(discord_name=str(interaction.user.name), discord_id=str(interaction.user.mention))
-            await user.save()
+        user = await check_profile(interaction)
         await review_area(interaction, user, client)
     else:
         await interaction.response.send_message(
@@ -147,42 +146,31 @@ async def feedback(interaction: discord.Interaction):
             ephemeral=True)
 
 
-# # Last Optimized [03-07-2024]
-# @client.tree.command(name="luck", description="all lucky!")
-# async def lucky_all(interaction: discord.Interaction):
-#     """OPTIMIZED METHOD"""
-#
-#     if interaction.guild.id == MAIN_GUILD_ID:
-#         await add_bot_use(datetime.date.today())
-#         uid = await check_profile(interaction)
-#         status = await select_query("*", table="today_luck", condition_column="uid", condition_value=uid)
-#         print(status)
-#
-#         if not status:
-#             try:
-#                 await interaction.response.defer()
-#                 await lucky_all_embeds(interaction.user, interaction, uid)
-#             except discord.errors.NotFound as e:
-#                 print(e)
-#             except Exception as e:
-#                 print(e)
-#
-#         else:
-#             try:
-#                 await interaction.response.defer()
-#                 data = await get_data(uid)
-#                 embed = await show_embed(data[0])
-#                 await interaction.followup.send(embed=embed)
-#             except Exception as e:
-#                 print(e)
-#
-#     else:
-#         await interaction.response.send_message(
-#             embed=discord.Embed(title='',
-#                                 description="This command is not available in this server.",
-#                                 color=discord.Color.red()),
-#             ephemeral=True)
-#
+# Last Optimized [03-07-2024]
+@client.tree.command(name="luck", description="all lucky!")
+async def lucky_all(interaction: discord.Interaction):
+    """OPTIMIZED METHOD"""
+
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+        await interaction.response.defer()
+        await add_bot_usage()
+        user = await check_profile(interaction)
+
+        # lucks = await TodayLuck.all().prefetch_related('uid').filter(hero_id=lucky_hero_id)
+        user_luck = await TodayLuck.get_or_none(uid=user)
+        if not user_luck:
+            await lucky_all_embeds(interaction, user)
+        else:
+            embed = await today_luck_embed(user_luck)
+            await interaction.followup.send(embed=embed)
+
+    else:
+        await interaction.response.send_message(
+            embed=discord.Embed(title='',
+                                description="This command is not available in this server.",
+                                color=discord.Color.red()),
+            ephemeral=True)
+
 
 # Last Optimization [19-01-2024]
 async def get_avatar(interaction):
@@ -213,6 +201,14 @@ async def add_bot_usage():
     today_usage = await BotUsage.get_or_none(date=datetime.datetime.utcnow())
     today_usage.lucky_bot = today_usage.lucky_bot + 1
     await today_usage.save()
+
+
+async def check_profile(interaction: discord.Interaction):
+    user = await Profile.get_or_none(discord_id=str(interaction.user.mention))
+    if not user:
+        user = Profile(discord_name=str(interaction.user.name), discord_id=str(interaction.user.mention))
+        await user.save()
+    return user
 
 
 client.run(os.getenv("TOKEN"))

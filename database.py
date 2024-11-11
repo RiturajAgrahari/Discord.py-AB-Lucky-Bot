@@ -179,20 +179,6 @@ async def creating_main_profile(interaction):
     return uid
 
 
-async def lucky_claimed(uid, location, container, weapon, item, summary):
-    mydb = open_database()
-    mycursor = mydb.cursor()
-    sql = f"INSERT INTO today_luck VALUES (DEFAULT, %s, %s, %s, %s, %s, %s)"
-    val = [(uid, location, container, weapon, item, summary)]
-    mycursor.executemany(sql, val)
-    mydb.commit()
-    mydb.close()
-
-
-async def add_use(uid):
-    await update_query(table="profile", key_value={"event_used": 1, "last_used_on": "DEFAULT"}, condition_column="uid", condition_value=uid, operation="addition")
-
-
 async def alter_db():
     pass
     # mydb = open_database()
