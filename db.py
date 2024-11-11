@@ -21,7 +21,7 @@ async def db_init():
                     }
                 }
             },
-            "app": {
+            "apps": {
                 "models": {
                     "models": ["models"],
                     "default_connection": "default"

@@ -1,6 +1,6 @@
 from tortoise.models import Model
 from tortoise import fields
-from datetime import datetime
+import datetime
 
 
 class Profile(Model):
@@ -12,7 +12,7 @@ class Profile(Model):
 
 class BotUsage(Model):
     id = fields.BigIntField(primary_key=True)
-    date = fields.DatetimeField(auto_now_add=True, default=datetime.utcnow())
+    date = fields.DateField(default=datetime.date.today())
     fandom_bot = fields.IntField(default=0)
     lucky_bot = fields.IntField(default=0)
     rpg_bot = fields.IntField(default=0)

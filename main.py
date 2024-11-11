@@ -2,9 +2,14 @@ import os
 import sys
 import datetime
 
+from log import logger
+from db import db_init
+from models import BotUsage
+
 from discord.ext import tasks
 from dotenv import load_dotenv
 from discord import app_commands
+from discord.errors import Forbidden
 
 from luck import *
 from embeds import help_embed
@@ -13,15 +18,15 @@ from database import (check_profile, get_data, select_query, add_bot_use)
 from manage import daily_checkup, manage_bot
 
 
-"""Loading credentials"""
+# LOADING ENV
 load_dotenv()
 
-# MY_GUILD = discord.Object(id=850804938510172182)  # my server
 
-MAIN_GUILD_ID = int(os.getenv("MAIN_SERVER_ID"))
-TEST_GUILD_ID = int(os.getenv("TEST_SERVER_ID"))
-
-"""Initializing Bot"""
+# INITIALIZING
+MY_GUILD = int(os.getenv("MY_GUILD"))
+TEST_GUILD = int(os.getenv("TEST_GUILD"))
+MAIN_GUILD = int(os.getenv("MAIN_GUILD"))
+guilds = [MY_GUILD, TEST_GUILD, MAIN_GUILD]
 
 
 class MyClient(discord.Client):
@@ -29,17 +34,18 @@ class MyClient(discord.Client):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
 
-    async def setup_hook(self):
-        # Set up command tree for the first guild
-        first_guild = discord.Object(id=MAIN_GUILD_ID)
-        self.tree.copy_global_to(guild=first_guild)
-        await self.tree.sync(guild=first_guild)
-
-        # Set up command tree for the second guild
-        second_guild = discord.Object(id=TEST_GUILD_ID)
-        if second_guild.id != MAIN_GUILD_ID:
-            self.tree.copy_global_to(guild=second_guild)
-            await self.tree.sync(guild=second_guild)
+    async def setup_hook(self) -> None:
+        """
+        Initializing guilds and connecting it to the bot.
+        :return:
+        """
+        for guild in guilds:
+            main_guild = discord.Object(id=guild)
+            try:
+                self.tree.copy_global_to(guild=main_guild)
+                await self.tree.sync(guild=main_guild)
+            except Forbidden:
+                logger.error(f"GUILD ID : [{guild}] Bot has Missing Access")
 
 
 intents = discord.Intents.default()
@@ -51,6 +57,7 @@ client = MyClient(intents=intents)
 async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
+    await db_init()
     await check_time.start()
 
 
@@ -89,28 +96,28 @@ async def on_message(message):
         guild_name = message.guild.name
         # print(f"[{channel}-----{username}------] : {user_message}")
 
-        if message.guild.id == MAIN_GUILD_ID:
-            if message.channel.id == 1140635890608255016 or message.channel.id == 1199253624350576692:
-                if message.content == "/luck" or "<@1149306688147562578>" in message.content:
-                    embed = await help_embed(username, message.author.avatar)
-                    await message.channel.send(embed=embed)
-
-            else:
-                if message.content == 'test' and message.author.mention == '<@568179896459722753>':
-                    await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
-
-                elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
-                    print('hi')
+        # if message.guild.id == MAIN_GUILD_ID:
+        if message.channel.id == 1140635890608255016 or message.channel.id == 1199253624350576692:
+            if message.content == "/luck" or "<@1149306688147562578>" in message.content:
+                embed = await help_embed(username, message.author.avatar)
+                await message.channel.send(embed=embed)
 
         else:
-            pass
+            if message.content == 'test' and message.author.mention == '<@568179896459722753>':
+                await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
+
+            elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
+                print('hi')
+
+        # else:
+        #     pass
 
 
 # Last Optimization [03-07-2024]
 @client.tree.command(name='help', description='Shows help for the bot.')
 async def help_command(interaction: discord.Interaction):
-    if interaction.guild.id == MAIN_GUILD_ID:
-        await add_bot_use(datetime.date.today())
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+        await add_bot_usage()
         avatar = await get_avatar(interaction)
         embed = await help_embed(interaction.user, avatar)
         await interaction.response.send_message(embed=embed)
@@ -121,59 +128,59 @@ async def help_command(interaction: discord.Interaction):
                                 color=discord.Color.red()),
             ephemeral=True)
 
-
-# Last Optimization [03-07-2024]
-@client.tree.command(name="feedback", description="help us to improve")
-async def feedback(interaction: discord.Interaction):
-    if interaction.guild.id == MAIN_GUILD_ID:
-        await add_bot_use(datetime.date.today())
-        # channel = client.get_channel(1085405558003204169)
-        uid = await check_profile(interaction)
-        await review_area(interaction, uid, client)
-    else:
-        await interaction.response.send_message(
-            embed=discord.Embed(title='',
-                                description="This command is not available in this server.",
-                                color=discord.Color.red()),
-            ephemeral=True)
-
-
-# Last Optimized [03-07-2024]
-@client.tree.command(name="luck", description="all lucky!")
-async def lucky_all(interaction: discord.Interaction):
-    """OPTIMIZED METHOD"""
-
-    if interaction.guild.id == MAIN_GUILD_ID:
-        await add_bot_use(datetime.date.today())
-        uid = await check_profile(interaction)
-        status = await select_query("*", table="today_luck", condition_column="uid", condition_value=uid)
-        print(status)
-
-        if not status:
-            try:
-                await interaction.response.defer()
-                await lucky_all_embeds(interaction.user, interaction, uid)
-            except discord.errors.NotFound as e:
-                print(e)
-            except Exception as e:
-                print(e)
-
-        else:
-            try:
-                await interaction.response.defer()
-                data = await get_data(uid)
-                embed = await show_embed(data[0])
-                await interaction.followup.send(embed=embed)
-            except Exception as e:
-                print(e)
-
-    else:
-        await interaction.response.send_message(
-            embed=discord.Embed(title='',
-                                description="This command is not available in this server.",
-                                color=discord.Color.red()),
-            ephemeral=True)
-
+#
+# # Last Optimization [03-07-2024]
+# @client.tree.command(name="feedback", description="help us to improve")
+# async def feedback(interaction: discord.Interaction):
+#     if interaction.guild.id == MAIN_GUILD_ID:
+#         await add_bot_use(datetime.date.today())
+#         # channel = client.get_channel(1085405558003204169)
+#         uid = await check_profile(interaction)
+#         await review_area(interaction, uid, client)
+#     else:
+#         await interaction.response.send_message(
+#             embed=discord.Embed(title='',
+#                                 description="This command is not available in this server.",
+#                                 color=discord.Color.red()),
+#             ephemeral=True)
+#
+#
+# # Last Optimized [03-07-2024]
+# @client.tree.command(name="luck", description="all lucky!")
+# async def lucky_all(interaction: discord.Interaction):
+#     """OPTIMIZED METHOD"""
+#
+#     if interaction.guild.id == MAIN_GUILD_ID:
+#         await add_bot_use(datetime.date.today())
+#         uid = await check_profile(interaction)
+#         status = await select_query("*", table="today_luck", condition_column="uid", condition_value=uid)
+#         print(status)
+#
+#         if not status:
+#             try:
+#                 await interaction.response.defer()
+#                 await lucky_all_embeds(interaction.user, interaction, uid)
+#             except discord.errors.NotFound as e:
+#                 print(e)
+#             except Exception as e:
+#                 print(e)
+#
+#         else:
+#             try:
+#                 await interaction.response.defer()
+#                 data = await get_data(uid)
+#                 embed = await show_embed(data[0])
+#                 await interaction.followup.send(embed=embed)
+#             except Exception as e:
+#                 print(e)
+#
+#     else:
+#         await interaction.response.send_message(
+#             embed=discord.Embed(title='',
+#                                 description="This command is not available in this server.",
+#                                 color=discord.Color.red()),
+#             ephemeral=True)
+#
 
 # Last Optimization [19-01-2024]
 async def get_avatar(interaction):
@@ -198,6 +205,12 @@ async def on_error(event, *args, **kwargs):
     error = str(sys.exc_info())
     error = error.replace(',', '\n')
     await send_error(__file__, event, error)
+
+
+async def add_bot_usage():
+    today_usage = await BotUsage.get_or_none(date=datetime.datetime.utcnow())
+    today_usage.lucky_bot = today_usage.lucky_bot + 1
+    await today_usage.save()
 
 
 client.run(os.getenv("TOKEN"))
