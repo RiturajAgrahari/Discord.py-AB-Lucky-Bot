@@ -90,7 +90,7 @@ async def on_message(message):
         # print(f"[{channel}-----{username}------] : {user_message}")
 
         if message.guild.id == MAIN_GUILD_ID:
-            if message.channel.id == 1140635890608255016:
+            if message.channel.id == 1140635890608255016 or message.channel.id == 1199253624350576692:
                 if message.content == "/luck" or "<@1149306688147562578>" in message.content:
                     embed = await help_embed(username, message.author.avatar)
                     await message.channel.send(embed=embed)

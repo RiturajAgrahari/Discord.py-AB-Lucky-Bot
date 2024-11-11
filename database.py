@@ -4,6 +4,7 @@ import os
 import mysql.connector
 from dotenv import load_dotenv
 from datetime import date, timedelta
+from typing import Union
 
 load_dotenv()
 
@@ -89,7 +90,7 @@ async def add_record():
 
 
 # Need to add multiple columns and conditions!
-async def select_query(column:str, table:str, condition_column:str=None, condition_value:str | int=None,
+async def select_query(column:str, table:str, condition_column:str=None, condition_value: Union[str, int]=None,
                        order_by_column:str=None, ascending:bool=True, limit:int=None, offset:int=0):
     sql = f"SELECT {column} FROM {table}"
 
@@ -121,7 +122,7 @@ async def select_query(column:str, table:str, condition_column:str=None, conditi
 
 
 # Need to add multiple conditions!
-async def update_query(table:str, key_value:dict, condition_column:str=None, condition_value:str | int=None, operation:str='equal'):
+async def update_query(table:str, key_value:dict, condition_column:str=None, condition_value:Union[str, int]=None, operation:str='equal'):
     if condition_column is None or condition_value is None:
         condition = ""
     else:
