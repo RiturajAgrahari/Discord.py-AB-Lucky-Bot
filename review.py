@@ -3,7 +3,7 @@
 
 import discord
 from discord import ui
-from discord.ui import View, Button
+from discord.ui import View
 from models import Review
 
 

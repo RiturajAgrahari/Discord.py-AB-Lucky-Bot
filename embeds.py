@@ -2,6 +2,10 @@ import discord
 import fandom
 
 
+# cache for image URLs
+cache = {}
+
+
 # Last Optimization [03-07-2024]
 async def help_embed(name, avatar):
     embed = discord.Embed(
@@ -34,16 +38,22 @@ async def today_luck_embed(user_luck):
     embed.add_field(name='Lucky Container', value=str(user_luck.container), inline=True)
     embed.add_field(name='Lucky Gun', value=str(user_luck.weapon), inline=True)
     embed.set_footer(text=str(user_luck.summary))
+    if cache.get(str(user_luck.weapon)) is None:
+        search_weapon = fandom.search(str(user_luck.weapon).capitalize(), results=1)
+        weapon_page = fandom.page(title=search_weapon[0][0], pageid=search_weapon[0][1])
+        weapon_image = weapon_page.images[0]
+        embed.set_image(url=weapon_image)
+        cache[str(user_luck.weapon)] = weapon_image
+    else:
+        embed.set_image(url=cache.get(str(user_luck.weapon)))
 
-    search = fandom.search(str(user_luck.weapon).capitalize(), results=1)
-    page = fandom.page(title=search[0][0], pageid=search[0][1])
-    image = page.images[0]
-    embed.set_image(url=image)
-
-    search2 = fandom.search(str(user_luck.item).capitalize(), results=1)
-    page2 = fandom.page(title=search2[0][0], pageid=search2[0][1])
-    image2 = page2.images[0]
-
-    embed.set_thumbnail(url=image2)
+    if cache.get(str(user_luck.item)) is None:
+        search_item = fandom.search(str(user_luck.item).capitalize(), results=1)
+        item_page = fandom.page(title=search_item[0][0], pageid=search_item[0][1])
+        item_image = item_page.images[0]
+        embed.set_thumbnail(url=item_image)
+        cache[str(user_luck.item)] = item_image
+    else:
+        embed.set_thumbnail(url=cache.get(str(user_luck.item)))
 
     return embed

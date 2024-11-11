@@ -16,11 +16,15 @@ from discord.errors import Forbidden
 from luck import lucky_all_embeds
 from embeds import help_embed, today_luck_embed
 from review import review_area
-from manage import daily_checkup, manage_bot
+from config import reset_data
+
+from config import config_bot
 
 
 # LOADING ENV
 load_dotenv()
+
+permitted_users = ['<@568179896459722753>']
 
 
 # INITIALIZING
@@ -59,12 +63,12 @@ async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
     await db_init()
-    await check_time.start()
+    await reset_function.start()
 
 
-# Last Optimization [03-07-2024]
+# Last Optimization [11-11-2024]
 @tasks.loop(minutes=1)
-async def check_time():
+async def reset_function():
     # Get the current UTC time
     try:
         current_time_utc = datetime.datetime.utcnow().today()
@@ -72,12 +76,12 @@ async def check_time():
         current_time_utc = datetime.datetime.now(datetime.datetime.UTC)
 
     # Check if it's UTC 00:00
+    # print(current_time_utc.hour, current_time_utc.minute)
     if current_time_utc.hour == 0 and current_time_utc.minute == 0:
-        response = await daily_checkup(client)
-        print(response)
+        await reset_data(client)
 
 
-# Last Optimization [03-07-2024]
+# Last Optimization [11-11-2024]
 @client.event
 async def on_message(message):
     # Check if the message author is not client itself
@@ -86,8 +90,6 @@ async def on_message(message):
 
     elif message.channel.type == discord.ChannelType.private:
         print(f'DM --> [{message.author}] : {message.content}')
-        if message.content == "**reset" and message.author.mention == '<@568179896459722753>':
-            await manage_bot(client)
 
     # Message in server channels
     else:
@@ -97,27 +99,18 @@ async def on_message(message):
         guild_name = message.guild.name
         # print(f"[{channel}-----{username}------] : {user_message}")
 
-        # if message.guild.id == MAIN_GUILD_ID:
-        if message.channel.id == 1140635890608255016 or message.channel.id == 1199253624350576692:
-            if message.content == "/luck" or "<@1149306688147562578>" in message.content:
-                embed = await help_embed(username, message.author.avatar)
-                await message.channel.send(embed=embed)
+        if message.author.mention in permitted_users:
+            if user_message == "tommy!":
+                await message.reply(content="wuff wuff!")
 
-        else:
-            if message.content == 'test' and message.author.mention == '<@568179896459722753>':
-                await send_error(__file__, on_message.__name__, 'error tested successful!', guild_name)
-
-            elif message.content == 'hi' and message.author.mention == '<@568179896459722753>':
-                print('hi')
-
-        # else:
-        #     pass
+            elif user_message == "$config-lucky":
+                await config_bot(message, client)
 
 
-# Last Optimization [03-07-2024]
+# Last Optimization [11-11-2024]
 @client.tree.command(name='help', description='Shows help for the bot.')
 async def help_command(interaction: discord.Interaction):
-    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention in permitted_users:
         await add_bot_usage()
         avatar = await get_avatar(interaction)
         embed = await help_embed(interaction.user, avatar)
@@ -130,10 +123,10 @@ async def help_command(interaction: discord.Interaction):
             ephemeral=True)
 
 
-# Last Optimization [03-07-2024]
+# Last Optimization [11-11-2024]
 @client.tree.command(name="feedback", description="help us to improve")
 async def feedback(interaction: discord.Interaction):
-    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention in permitted_users:
         await add_bot_usage()
         user = await check_profile(interaction)
         await review_area(interaction, user, client)
@@ -145,17 +138,15 @@ async def feedback(interaction: discord.Interaction):
             ephemeral=True)
 
 
-# Last Optimized [03-07-2024]
+# Last Optimized [11-11-2024]
 @client.tree.command(name="luck", description="all lucky!")
 async def lucky_all(interaction: discord.Interaction):
     """OPTIMIZED METHOD"""
 
-    if interaction.guild.id == MAIN_GUILD or interaction.user.mention == "<@568179896459722753>":
+    if interaction.guild.id == MAIN_GUILD or interaction.user.mention in permitted_users:
         await interaction.response.defer()
         await add_bot_usage()
         user = await check_profile(interaction)
-
-        # lucks = await TodayLuck.all().prefetch_related('uid').filter(hero_id=lucky_hero_id)
         user_luck = await TodayLuck.get_or_none(uid=user)
         if not user_luck:
             await lucky_all_embeds(interaction, user)

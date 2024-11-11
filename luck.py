@@ -8,6 +8,7 @@ import random
 import fandom
 
 from models import TodayLuck, Profile
+from embeds import today_luck_embed
 
 fandom.set_wiki('arena-breakout')
 
@@ -244,6 +245,7 @@ Summaries = [
 
 hvl = {}
 
+
 async def generate_random_data():
     random_mode = list(NEW.keys())[random.randint(0, len(NEW)-1)]
     maps = NEW[random_mode]
@@ -262,66 +264,25 @@ async def get_random_weapon(n=0):
     random_category = list(Weapons.keys())[random.randint(0, len(Weapons) - 1)]
     weapons = Weapons[random_category]
     random_weapon = list(weapons.keys())[random.randint(0, len(weapons) - 1)]
-
-    if Weapons[random_category][random_weapon]:
-        image = Weapons[random_category][random_weapon]
-    else:
-        search = fandom.search(str(random_weapon).capitalize(), results=1)
-        if search:
-            page = fandom.page(title=search[0][0], pageid=search[0][1])
-            image = page.images[0]
-            Weapons[random_category][random_weapon] = image
-        elif n < 5:
-            image, random_weapon = await get_random_weapon(n=n+1)
-        else:
-            image = None
-
-    return image, random_weapon
+    return random_weapon
 
 
 async def get_random_loot_item(n=0):
     random_loot = list(High_Value_Loot.keys())[random.randint(0, len(High_Value_Loot)-1)]
-
-    if High_Value_Loot[random_loot]:
-        image = High_Value_Loot[random_loot]
-    else:
-        search = fandom.search(str(random_loot).capitalize(), results=1)
-        if search:
-            page = fandom.page(title=search[0][0], pageid=search[0][1])
-            image = page.images[0]
-            High_Value_Loot[random_loot] = image
-        elif n < 5:
-            image, random_loot = await get_random_weapon(n=n + 1)
-        else:
-            image = None
-
-    return image, random_loot
+    return random_loot
 
 
 async def lucky_all_embeds(interaction, uid):
     random_location, random_container, random_summary = await generate_random_data()
-    weapon_image, random_weapon = await get_random_weapon()
-    loot_image, random_loot = await get_random_loot_item()
-
-    embed = discord.Embed(
-        title="Today's Lucky Loot:", description=random_loot, color=discord.Color.blue()
-    )
-    embed.add_field(name='Lucky Location', value=random_location, inline=False)
-    embed.add_field(name='Lucky Container', value=random_container, inline=True)
-    embed.add_field(name='Lucky Gun', value=random_weapon, inline=True)
-    embed.set_footer(text=random_summary)
-
-    try:
-        embed.set_image(url=f'{weapon_image}')
-        embed.set_thumbnail(url=f'{loot_image}')
-    except Exception as e:
-        print(e)
-
-    await interaction.followup.send(embed=embed)
+    random_weapon = await get_random_weapon()
+    random_loot = await get_random_loot_item()
 
     user_luck = TodayLuck(uid=uid, location=random_location, container=random_container, weapon=random_weapon,
                           item=random_loot, summary=random_summary)
     await user_luck.save()
+    embed = await today_luck_embed(user_luck)
+
+    await interaction.followup.send(embed=embed)
 
     bot_usage = await Profile.get_or_none(id=uid.id)
     bot_usage.bot_used = bot_usage.bot_used + 1

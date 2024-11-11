@@ -1,20 +1,19 @@
 import discord
 import numpy as np
 import matplotlib.pyplot as plt
-from database import select_query
+from models import BotUsage
 
 
 async def show_graph(offset: int = 0):
     labels = []  # x-axis label
     uses = []  # graph data (bar length)
 
-    record = await select_query(
-        column='*', table='record', order_by_column='sn', ascending=False, limit=10, offset=int(offset))
+    record = await BotUsage.all().order_by("id").limit(10).offset(offset)
 
     print(record)
     for i in range(0, len(record)):
-        labels.append(str(record[i][1]))  # list of x-axis label
-        uses.append(int(record[i][2]))  # list of graph data (bar length)
+        labels.append(str(record[i].date))  # list of x-axis label
+        uses.append(int(record[i].lucky_bot))  # list of graph data (bar length)
 
     xpoints = np.array(labels)  # array of x-axis label
     ypoints = np.array(uses)  # array of graph data (bar length)
