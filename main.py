@@ -13,10 +13,9 @@ from dotenv import load_dotenv
 from discord import app_commands
 from discord.errors import Forbidden
 
-from luck import *
+from luck import lucky_all_embeds
 from embeds import help_embed, today_luck_embed
 from review import review_area
-from database import get_data, select_query
 from manage import daily_checkup, manage_bot
 
 
