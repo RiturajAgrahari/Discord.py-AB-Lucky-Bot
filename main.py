@@ -188,9 +188,12 @@ async def on_error(event, *args, **kwargs):
 
 
 async def add_bot_usage():
-    today_usage = await BotUsage.get_or_none(date=datetime.datetime.utcnow())
-    today_usage.lucky_bot = today_usage.lucky_bot + 1
-    await today_usage.save()
+    try:
+        today_usage = await BotUsage.get_or_none(date=datetime.datetime.today())
+        today_usage.lucky_bot = today_usage.lucky_bot + 1
+        await today_usage.save()
+    except Exception as e:
+        await send_error(__file__, "add not usage", e)
 
 
 async def check_profile(interaction: discord.Interaction):
