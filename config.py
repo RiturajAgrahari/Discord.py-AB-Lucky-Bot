@@ -1,3 +1,5 @@
+import datetime
+
 import discord
 from discord.ui import View
 from Plotting import show_graph
@@ -13,8 +15,6 @@ async def config_bot(message, client):
         description="configure Lucky Bot functionality here.",
         color=discord.Color.red()
     )
-    # embed.add_field(name="_NOTE:_", value="Use the button implement changes after doing any configuration to make sure"
-    #                                       " that the update is successfully implemented.", inline=False)
 
     class MyView(View):
         def __init__(self):
@@ -56,7 +56,7 @@ async def reset_data(client):
     await TodayLuck.all().delete()
 
     # Initiate a row with new date with 0 value in -bot_info- table
-    new_usage = BotUsage(fandom_bot=0)
+    new_usage = BotUsage(date=datetime.date.today())
     await new_usage.save()
 
     # create a daily graph

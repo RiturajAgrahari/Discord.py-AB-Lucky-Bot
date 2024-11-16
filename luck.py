@@ -272,7 +272,7 @@ async def get_random_loot_item(n=0):
     return random_loot
 
 
-async def lucky_all_embeds(interaction, uid):
+async def lucky_all_embeds(interaction, uid, debug):
     random_location, random_container, random_summary = await generate_random_data()
     random_weapon = await get_random_weapon()
     random_loot = await get_random_loot_item()
@@ -280,9 +280,8 @@ async def lucky_all_embeds(interaction, uid):
     user_luck = TodayLuck(uid=uid, location=random_location, container=random_container, weapon=random_weapon,
                           item=random_loot, summary=random_summary)
     await user_luck.save()
-    embed = await today_luck_embed(user_luck)
-
-    await interaction.followup.send(embed=embed)
+    embed, view = await today_luck_embed(user_luck, debug)
+    await interaction.followup.send(embed=embed, view=view)
 
     bot_usage = await Profile.get_or_none(id=uid.id)
     bot_usage.bot_used = bot_usage.bot_used + 1
