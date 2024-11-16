@@ -243,7 +243,7 @@ async def on_error(event, *args, **kwargs):
 
 @catch_error_decorator()
 async def add_bot_usage():
-    today_usage = await BotUsage.get_or_none(date=datetime.datetime.today)
+    today_usage = await BotUsage.get_or_none(date=datetime.datetime.today())
     today_usage.lucky_bot = today_usage.lucky_bot + 1
     await today_usage.save()
 
