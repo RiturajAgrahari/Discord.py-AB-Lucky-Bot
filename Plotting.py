@@ -8,7 +8,7 @@ async def show_graph(offset: int = 0):
     labels = []  # x-axis label
     uses = []  # graph data (bar length)
 
-    record = await BotUsage.all().order_by("id").limit(10).offset(offset)
+    record = await BotUsage.all().order_by("-id").limit(10).offset(offset)
 
     print(record)
     for i in range(0, len(record)):
