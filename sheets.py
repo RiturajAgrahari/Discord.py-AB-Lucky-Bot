@@ -115,7 +115,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        profiles = await Profile.all()
+        profiles = await Profile.all().order_by('id')
 
         # IF feedback information is available in database.
         if profiles:
@@ -151,7 +151,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        bot_usages = await BotUsage.all()
+        bot_usages = await BotUsage.all().order_by('date')
 
         # IF feedback information is available in database.
         if bot_usages:
@@ -188,7 +188,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        reviews = await Review.all().prefetch_related('uid')
+        reviews = await Review.all().prefetch_related('uid').order_by('reviewed_on')
 
         # IF feedback information is available in database.
         if reviews:
@@ -225,7 +225,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        lucks = await TodayLuck.all().prefetch_related('uid')
+        lucks = await TodayLuck.all().prefetch_related('uid').order_by('id')
 
         # IF feedback information is available in database.
         if lucks:
