@@ -188,7 +188,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        reviews = await Review.all()
+        reviews = await Review.all().prefetch_related('uid')
 
         # IF feedback information is available in database.
         if reviews:
@@ -198,7 +198,7 @@ class GoogleSheets:
                 review_data = [
                     [
                         str(review.id),
-                        str(review.uid),
+                        str(review.uid.id),
                         str(review.review),
                         str(review.star_rating),
                         str(review.reviewed_on)
@@ -225,7 +225,7 @@ class GoogleSheets:
         )
 
         # Fetching feedback information.
-        lucks = await TodayLuck.all()
+        lucks = await TodayLuck.all().prefetch_related('uid')
 
         # IF feedback information is available in database.
         if lucks:
@@ -235,7 +235,7 @@ class GoogleSheets:
                 luck_data = [
                     [
                         str(luck.id),
-                        str(luck.uid),
+                        str(luck.uid.id),
                         str(luck.location),
                         str(luck.container),
                         str(luck.weapon),
