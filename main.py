@@ -21,6 +21,7 @@ from review import review_area
 from config import reset_data
 
 from config import config_bot
+from sheets import GoogleSheets
 
 
 # LOADING ENV
@@ -42,6 +43,7 @@ class MyClient(discord.Client):
     def __init__(self, *, intents: discord.Intents):
         super().__init__(intents=intents)
         self.tree = app_commands.CommandTree(self)
+        self.sheets = None
 
     async def setup_hook(self) -> None:
         """
@@ -92,6 +94,8 @@ async def on_ready():
     print(f'Logged in as {client.user} (ID: {client.user.id})')
     print('------')
     await db_init()
+    client.sheets = GoogleSheets()
+    await client.sheets.connect_to_sheet()
     await reset_function.start()
 
 

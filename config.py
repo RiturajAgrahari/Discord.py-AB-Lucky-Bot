@@ -30,6 +30,18 @@ async def config_bot(message, client):
             await interaction.response.send_message(f"`>>> Record is sent in your DM`", ephemeral=True)
             await interaction.message.delete()
 
+        @discord.ui.button(label='Sync Data to Spreadsheet', style=discord.ButtonStyle.gray)
+        async def sync_data(self, interaction: discord.Interaction, button: discord.ui.Button):
+            await interaction.response.defer(ephemeral=True)
+            await interaction.client.sheets.sync_profile_data()
+            await interaction.client.sheets.sync_botusage_data()
+            await interaction.client.sheets.sync_review_data()
+            await interaction.client.sheets.sync_todayluck_data()
+            await interaction.followup.send(
+                content=f"> Profile Data has been synced to the Google Spreadsheet, Kindly check\n"
+                        f"https://docs.google.com/spreadsheets/d/1-11_cxFiXZ3JKQebJblP9xkci5HUU9WOScpdiCDzILE/edit?gid=0#gid=0"
+            )
+
         @discord.ui.button(label='Close config menu', style=discord.ButtonStyle.gray)
         async def close(self, interaction: discord.Interaction, button: discord.ui.Button):
             await interaction.message.delete()
