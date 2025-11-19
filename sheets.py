@@ -97,7 +97,7 @@ class GoogleSheets:
         # Creating a new row in sheets
         self.sheet.values().update(
             spreadsheetId=SPREADSHEET_ID,
-            range=f"profile!A2:{self.range[3]}{len(data) + 1}",
+            range=f"{sheet}!A2:{self.range[3]}{len(data) + 1}",
             valueInputOption="USER_ENTERED",
             body={"values": data}
         ).execute()
